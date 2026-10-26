@@ -15,6 +15,12 @@ from seed import seed_data
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'spendwise-student-secret-2026')
 
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=bool(os.environ.get('VERCEL'))
+)
+
 # Categories tailored specifically for B.Tech student life
 EXPENSE_CATEGORIES = [
     'Hostel Fees',
@@ -52,6 +58,18 @@ CATEGORY_ICONS = {
     'Scholarship': '🎓'
 }
 
+def normalize_date(date_str):
+    """Normalize user input dates (DD-MM-YYYY, YYYY-MM-DD, DD/MM/YYYY) into ISO YYYY-MM-DD."""
+    if not date_str:
+        return datetime.date.today().strftime('%Y-%m-%d')
+    date_str = str(date_str).strip()
+    for fmt in ('%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%Y/%m/%d', '%m/%d/%Y'):
+        try:
+            return datetime.datetime.strptime(date_str, fmt).strftime('%Y-%m-%d')
+        except ValueError:
+            continue
+    return None
+
 def get_db():
     if 'db' not in g:
         g.db = get_db_connection()
@@ -62,6 +80,29 @@ def close_db(error=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+@app.before_request
+def ensure_user_in_db():
+    """Ensure logged-in user exists in local container DB (prevents container desync)."""
+    user_id = session.get('user_id')
+    if user_id:
+        try:
+            db = get_db()
+            cursor = db.cursor()
+            cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+            if not cursor.fetchone():
+                cursor.execute("""
+                    INSERT OR IGNORE INTO users (id, name, email, password_hash)
+                    VALUES (?, ?, ?, ?)
+                """, (
+                    user_id,
+                    session.get('user_name', 'Student User'),
+                    session.get('user_email', f'user{user_id}@spendwise.com'),
+                    session.get('user_hash', '')
+                ))
+                db.commit()
+        except Exception:
+            pass
 
 def login_required(f):
     @wraps(f)
@@ -102,8 +143,11 @@ def currency_filter(value):
 @app.template_filter('format_date')
 def format_date(value):
     try:
-        dt = datetime.datetime.strptime(str(value), '%Y-%m-%d')
-        return dt.strftime('%d %b %Y')
+        norm = normalize_date(value)
+        if norm:
+            dt = datetime.datetime.strptime(norm, '%Y-%m-%d')
+            return dt.strftime('%d %b %Y')
+        return str(value)
     except Exception:
         return str(value)
 
@@ -140,6 +184,7 @@ def login():
             session['user_id'] = user['id']
             session['user_name'] = user['name']
             session['user_email'] = user['email']
+            session['user_hash'] = user['password_hash']
             flash(f"Welcome back, {user['name']}!", 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('dashboard'))
@@ -203,6 +248,7 @@ def register():
     session['user_id'] = user_id
     session['user_name'] = name
     session['user_email'] = email
+    session['user_hash'] = password_hash
 
     flash(f"Welcome to SpendWise, {name}! Your student finance tracker is ready.", 'success')
     return redirect(url_for('dashboard'))
@@ -239,8 +285,8 @@ def dashboard():
         WHERE user_id = ? AND strftime('%Y-%m', date) = ?
     """, (user_id, current_month_str))
     month_summary = cursor.fetchone()
-    total_income = month_summary['income']
-    total_expense = month_summary['expense']
+    total_income = month_summary['income'] if month_summary else 0.0
+    total_expense = month_summary['expense'] if month_summary else 0.0
     current_balance = total_income - total_expense
 
     # Recent 5 transactions
@@ -481,8 +527,8 @@ def api_dashboard():
         WHERE user_id = ? AND strftime('%Y-%m', date) = ?
     """, (user_id, current_month_str))
     res = cursor.fetchone()
-    inc = res['income']
-    exp = res['expense']
+    inc = res['income'] if res else 0.0
+    exp = res['expense'] if res else 0.0
 
     cursor.execute("""
         SELECT id, type, amount, category, date, note
@@ -597,7 +643,7 @@ def add_transaction():
     tx_type = data.get('type', '').strip()
     amount_str = data.get('amount', '')
     category = data.get('category', '').strip()
-    date_str = data.get('date', '').strip()
+    raw_date = data.get('date', '').strip()
     note = data.get('note', '').strip()
 
     # Validation
@@ -611,26 +657,26 @@ def add_transaction():
     except (ValueError, TypeError):
         return jsonify({'success': False, 'error': 'Please enter a valid numeric amount.'}), 400
 
+    date_str = normalize_date(raw_date)
     if not date_str:
-        return jsonify({'success': False, 'error': 'Date is required.'}), 400
-
-    try:
-        datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    except ValueError:
-        return jsonify({'success': False, 'error': 'Invalid date format (must be YYYY-MM-DD).'}), 400
+        return jsonify({'success': False, 'error': f"Invalid date format: '{raw_date}'. Please use YYYY-MM-DD or DD-MM-YYYY."}), 400
 
     valid_categories = EXPENSE_CATEGORIES if tx_type == 'Expense' else INCOME_CATEGORIES
     if not category or category not in valid_categories:
         return jsonify({'success': False, 'error': f"Category '{category}' is invalid for {tx_type}."}), 400
 
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("""
-        INSERT INTO transactions (user_id, type, amount, category, date, note)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (user_id, tx_type, amount, category, date_str, note))
-    db.commit()
-    new_id = cursor.lastrowid
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO transactions (user_id, type, amount, category, date, note)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, tx_type, amount, category, date_str, note))
+        db.commit()
+        new_id = cursor.lastrowid
+    except Exception as e:
+        app.logger.error(f"Error inserting transaction: {e}")
+        return jsonify({'success': False, 'error': f"Failed to save transaction: {str(e)}"}), 500
 
     if request.is_json or request.path.startswith('/api/'):
         return jsonify({
@@ -676,7 +722,7 @@ def update_transaction(tx_id):
     tx_type = data.get('type', '').strip()
     amount_str = data.get('amount', '')
     category = data.get('category', '').strip()
-    date_str = data.get('date', '').strip()
+    raw_date = data.get('date', '').strip()
     note = data.get('note', '').strip()
 
     if tx_type not in ['Income', 'Expense']:
@@ -689,24 +735,24 @@ def update_transaction(tx_id):
     except (ValueError, TypeError):
         return jsonify({'success': False, 'error': 'Invalid amount.'}), 400
 
+    date_str = normalize_date(raw_date)
     if not date_str:
-        return jsonify({'success': False, 'error': 'Date is required.'}), 400
-
-    try:
-        datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    except ValueError:
         return jsonify({'success': False, 'error': 'Invalid date format.'}), 400
 
     valid_categories = EXPENSE_CATEGORIES if tx_type == 'Expense' else INCOME_CATEGORIES
     if not category or category not in valid_categories:
         return jsonify({'success': False, 'error': f"Category '{category}' is invalid for {tx_type}."}), 400
 
-    cursor.execute("""
-        UPDATE transactions
-        SET type = ?, amount = ?, category = ?, date = ?, note = ?
-        WHERE id = ? AND user_id = ?
-    """, (tx_type, amount, category, date_str, note, tx_id, user_id))
-    db.commit()
+    try:
+        cursor.execute("""
+            UPDATE transactions
+            SET type = ?, amount = ?, category = ?, date = ?, note = ?
+            WHERE id = ? AND user_id = ?
+        """, (tx_type, amount, category, date_str, note, tx_id, user_id))
+        db.commit()
+    except Exception as e:
+        app.logger.error(f"Error updating transaction: {e}")
+        return jsonify({'success': False, 'error': f"Failed to update transaction: {str(e)}"}), 500
 
     if request.is_json or request.path.startswith('/api/'):
         return jsonify({'success': True, 'message': 'Transaction updated successfully!'})
@@ -720,8 +766,11 @@ def delete_transaction(tx_id):
     user_id = session['user_id']
     cursor = db.cursor()
 
-    cursor.execute("DELETE FROM transactions WHERE id = ? AND user_id = ?", (tx_id, user_id))
-    db.commit()
+    try:
+        cursor.execute("DELETE FROM transactions WHERE id = ? AND user_id = ?", (tx_id, user_id))
+        db.commit()
+    except Exception as e:
+        return jsonify({'success': False, 'error': f"Failed to delete: {str(e)}"}), 500
 
     if cursor.rowcount == 0:
         return jsonify({'success': False, 'error': 'Transaction not found.'}), 404
@@ -753,15 +802,18 @@ def update_budget():
     except (ValueError, TypeError):
         return jsonify({'success': False, 'error': 'Limit must be a valid number.'}), 400
 
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("""
-        INSERT INTO budgets (user_id, category, limit_amount, month, year)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(user_id, category, month, year)
-        DO UPDATE SET limit_amount = excluded.limit_amount
-    """, (user_id, category, limit_amount, month, year))
-    db.commit()
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO budgets (user_id, category, limit_amount, month, year)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, category, month, year)
+            DO UPDATE SET limit_amount = excluded.limit_amount
+        """, (user_id, category, limit_amount, month, year))
+        db.commit()
+    except Exception as e:
+        return jsonify({'success': False, 'error': f"Failed to update budget: {str(e)}"}), 500
 
     return jsonify({
         'success': True,

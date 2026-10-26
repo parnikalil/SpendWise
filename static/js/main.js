@@ -171,12 +171,24 @@ function initModal() {
     try {
       const res = await fetch(url, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
 
-      if (data.success) {
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        // If server returned non-JSON HTML error
+        showModalError(`Server returned status ${res.status}. Please try again.`);
+        return;
+      }
+
+      if (res.ok && data && data.success) {
         closeModal();
         showToast(data.message || 'Saved successfully!', 'success');
         // Reload page to refresh metrics, charts, and tables
@@ -184,11 +196,11 @@ function initModal() {
           window.location.reload();
         }, 300);
       } else {
-        showModalError(data.error || 'Failed to save transaction.');
+        showModalError((data && data.error) || `Error (${res.status}): Failed to save transaction.`);
       }
     } catch (err) {
-      console.error(err);
-      showModalError('Network error while saving transaction.');
+      console.error('Fetch error:', err);
+      showModalError('Connection issue: Could not reach the server. Please try again.');
     }
   });
 

@@ -11,20 +11,29 @@ DB_PATH = os.path.join(DB_DIR, 'spendwise.db')
 PRESEEDED_DB = os.path.join(BASE_DIR, 'spendwise.db')
 
 def ensure_database_ready():
-    """Ensure database exists and is writable in both local and serverless environments."""
-    if IS_VERCEL and not os.path.exists(DB_PATH):
-        if os.path.exists(PRESEEDED_DB):
-            shutil.copy2(PRESEEDED_DB, DB_PATH)
-        else:
-            init_db()
-            from seed import seed_data
-            seed_data()
+    """Ensure database exists and is fully read-write in both local and serverless environments."""
+    if IS_VERCEL:
+        if not os.path.exists(DB_PATH):
+            if os.path.exists(PRESEEDED_DB):
+                # Use copyfile instead of copy2 so read-only file permissions are not copied
+                shutil.copyfile(PRESEEDED_DB, DB_PATH)
+            else:
+                init_db()
+                from seed import seed_data
+                seed_data()
+        
+        # Ensure full read-write permissions on DB_PATH
+        try:
+            os.chmod(DB_PATH, 0o666)
+        except Exception:
+            pass
 
 def get_db_connection():
     ensure_database_ready()
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=20.0)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
+    # Foreign keys off in serverless to prevent multi-lambda container desync errors
+    conn.execute("PRAGMA foreign_keys = OFF;")
     return conn
 
 def init_db():
@@ -54,8 +63,7 @@ def init_db():
         category TEXT NOT NULL,
         date TEXT NOT NULL,
         note TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
 
@@ -68,8 +76,7 @@ def init_db():
         month INTEGER NOT NULL,
         year INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, category, month, year),
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        UNIQUE(user_id, category, month, year)
     );
     """)
 
