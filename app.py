@@ -13,22 +13,43 @@ from database import DB_PATH, init_db, get_db_connection
 from seed import seed_data
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'spendwise-secure-session-key-2026')
+app.secret_key = os.environ.get('SECRET_KEY', 'spendwise-student-secret-2026')
 
-EXPENSE_CATEGORIES = ['Food', 'Rent', 'Transport', 'Entertainment', 'Shopping', 'Health', 'Others']
-INCOME_CATEGORIES = ['Salary', 'Freelance', 'Gift', 'Others']
+# Categories tailored specifically for B.Tech student life
+EXPENSE_CATEGORIES = [
+    'Hostel Fees',
+    'Food',
+    'Fuel',
+    'Travel',
+    'Stationery',
+    'Phone Recharge',
+    'Tech & Books',
+    'Entertainment',
+    'Others'
+]
+
+INCOME_CATEGORIES = [
+    'Allowance',
+    'Internship Stipend',
+    'Freelance',
+    'Scholarship',
+    'Others'
+]
 
 CATEGORY_ICONS = {
+    'Hostel Fees': '🏠',
     'Food': '🍔',
-    'Rent': '🏠',
-    'Transport': '🚗',
+    'Fuel': '⛽',
+    'Travel': '🚆',
+    'Stationery': '📚',
+    'Phone Recharge': '📱',
+    'Tech & Books': '💻',
     'Entertainment': '🎬',
-    'Shopping': '🛍️',
-    'Health': '💊',
     'Others': '📦',
-    'Salary': '💼',
+    'Allowance': '💵',
+    'Internship Stipend': '💼',
     'Freelance': '💻',
-    'Gift': '🎁'
+    'Scholarship': '🎓'
 }
 
 def get_db():
@@ -48,7 +69,7 @@ def login_required(f):
         if 'user_id' not in session:
             if request.path.startswith('/api/'):
                 return jsonify({'success': False, 'error': 'Unauthorized'}), 401
-            flash('Please log in to access this page.', 'warning')
+            flash('Please log in to access your student dashboard.', 'warning')
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
@@ -158,16 +179,18 @@ def register():
     db.commit()
     user_id = cursor.lastrowid
 
-    # Seed default budgets for new user for current month
+    # Seed default student budgets for new user for current month
     today = datetime.date.today()
     default_limits = {
-        'Food': 12000.0,
-        'Rent': 25000.0,
-        'Transport': 5000.0,
-        'Entertainment': 6000.0,
-        'Shopping': 8000.0,
-        'Health': 6000.0,
-        'Others': 4000.0
+        'Hostel Fees': 12000.0,
+        'Food': 5500.0,
+        'Fuel': 2000.0,
+        'Travel': 2500.0,
+        'Stationery': 1500.0,
+        'Phone Recharge': 1000.0,
+        'Tech & Books': 3000.0,
+        'Entertainment': 2000.0,
+        'Others': 1500.0
     }
     for cat, lim in default_limits.items():
         cursor.execute("""
@@ -181,7 +204,7 @@ def register():
     session['user_name'] = name
     session['user_email'] = email
 
-    flash(f"Account created successfully! Welcome to SpendWise, {name}.", 'success')
+    flash(f"Welcome to SpendWise, {name}! Your student finance tracker is ready.", 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/logout')
@@ -504,22 +527,24 @@ def api_charts():
     expense_labels = [r['category'] for r in cat_rows]
     expense_data = [float(r['total']) for r in cat_rows]
 
-    # Warm orange palette as required
+    # Warm orange student palette
     orange_palette = [
-        '#F97316', # Primary orange
-        '#FB923C', # Light orange
+        '#F97316', # Primary vibrant orange
+        '#FB923C', # Light amber orange
         '#FDBA74', # Soft peach orange
-        '#FED7AA', # Very soft orange
+        '#FED7AA', # Very soft pale orange
         '#EA580C', # Deep burnt orange
-        '#C2410C', # Dark amber orange
-        '#9A3412', # Deep rust orange
+        '#C2410C', # Dark rust orange
+        '#9A3412', # Deep earthy orange
+        '#FF7A00', # Electric orange
+        '#D97706'  # Amber
     ]
 
     # 2. Income vs Expense for last 6 months (chronological order)
     months_keys = []
     cur_y = today.year
     cur_m = today.month
-    for i in range(5, -1, -1): # Chronological: 5 months ago to current month
+    for i in range(5, -1, -1):
         m = cur_m - i
         y = cur_y
         while m <= 0:
@@ -754,10 +779,10 @@ if __name__ == '__main__':
 
     port = int(os.environ.get('PORT', 5000))
     print("\n" + "=" * 65)
-    print("  🚀 SpendWise - Personal Finance Tracker")
+    print("  🚀 SpendWise — B.Tech. Student Edition (Parnika Lilani)")
     print(f"  🌐 Application URL: http://127.0.0.1:{port}")
-    print("  👤 Demo Account:    test@spendwise.com")
-    print("  🔑 Demo Password:   test123")
+    print("  👤 Student Account: parnika@spendwise.com")
+    print("  🔑 Password:        test123")
     print("=" * 65 + "\n")
 
     app.run(host='127.0.0.1', port=port, debug=True)

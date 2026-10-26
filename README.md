@@ -1,107 +1,93 @@
-# 💸 SpendWise — Personal Finance Tracker
+# 💸 SpendWise — B.Tech. Student Edition (Parnika Lilani)
 
-SpendWise is a sleek, modern, full-stack personal finance tracker built with Flask, SQLite, and vanilla HTML/CSS/JavaScript with a dark fintech UI and orange accents.
+SpendWise is a sleek, dark-themed personal finance tracker specifically adapted for **Parnika Lilani**, a B.Tech. engineering student. Built with **Flask**, **SQLite**, and **vanilla HTML/CSS/JavaScript** (no React, no npm, no frontend frameworks).
+
+---
+
+## 🎓 Tailored for B.Tech. College Life
+
+SpendWise includes spending and income streams designed for an engineering student:
+
+### 📉 Student Expense Categories:
+1. **🏠 Hostel Fees**: Semester accommodation, room installment, mess fees, laundry deposits.
+2. **🍔 Food**: College mess card recharge, campus canteen cutting chai & samosas, midnight Maggi during exams.
+3. **⛽ Fuel**: Two-wheeler scooty petrol for college, coaching, and lab commute.
+4. **🚆 Travel**: Metro card recharge, auto rides, holiday trains & buses back home for semester breaks.
+5. **📚 Stationery**: Engineering graphics drawing sheets, Casio fx-991CW scientific calculator, lab journals, assignment Xerox and printouts.
+6. **📱 Phone Recharge**: 5G student data plans (Airtel / Jio 3-month unlimited pack), hostel room shared WiFi contribution.
+7. **💻 Tech & Books**: Udemy/Coursera coding courses, core engineering textbooks (DSA, OS, DBMS), cloud credits for group projects.
+8. **🎬 Entertainment**: College tech fest & hackathon passes, batch movie nights, outings with friends.
+9. **📦 Others**: Semester exam admit card fees, campus pharmacy, personal care.
+
+### 📈 Student Income Streams:
+- **💵 Allowance**: Monthly pocket money and college support from parents.
+- **💼 Internship Stipend**: Remote / summer frontend software development internship earnings.
+- **💻 Freelance**: Python automation scripts, web design, and coding tasks for seniors/clients.
+- **🎓 Scholarship**: University merit-cum-means scholarship awards.
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Requirements
-- Python 3.10+
-- Flask & Werkzeug (`pip install -r requirements.txt`)
-
-### 2. Run the Application
+### 1. Run the Application
 ```bash
 python app.py
 ```
 
-The database (`spendwise.db`) is automatically created and seeded on the very first run.
+The database (`spendwise.db`) is automatically initialized and seeded on the very first run.
 Open your browser at:
 👉 **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ---
 
-## 👤 Demo Credentials
-You can log in directly with the pre-seeded account:
-- **Email:** `test@spendwise.com`
-- **Password:** `test123`
-*(There is also an instant "Use Demo Credentials" button on the login screen for 1-click convenience!)*
+## 👤 Test Student Account
+
+| Field | Value |
+|---|---|
+| **Name** | **Parnika Lilani** |
+| **Email** | `parnika@spendwise.com` (or `test@spendwise.com`) |
+| **Password** | `test123` |
+| **Quick Access** | Click **"⚡ Login as Parnika Lilani"** on the login page for 1-click demo entry! |
 
 ---
 
-## 🎨 Design System
-- **Dark Background:** `#0F0F0F`
-- **Card Background:** `#1A1A1A`
-- **Surface & Hover:** `#222222` / `#2A2A2A`
+## 🎨 Visual Design System
+
+- **Dark Mode Background:** `#0F0F0F`
+- **Cards & Surfaces:** `#1A1A1A` with subtle border `#2A2A2A`
 - **Primary Accent:** Orange `#F97316`
-- **Text:** Crisp White `#FFFFFF` & Light Grey `#E5E5E5`
 - **Typography:** `Inter` from Google Fonts
-- **Currency:** Indian Rupee symbol `₹` with formatted numbers
-- **Dynamic Progress Bars:** Orange below 85% usage; changes to Red `#EF4444` when exceeding 85% threshold.
-
----
-
-## 🛠️ Features & Pages
-
-1. **Authentication (`/login`)**
-   - Clean dark-mode card with SpendWise orange branding.
-   - Toggle seamlessly between Login and Register on the same page.
-   - Secure password hashing using `werkzeug.security`.
-
-2. **Dashboard (`/dashboard`)**
-   - 3 Summary Cards: Total Income (this month), Total Expense (this month), Net Balance.
-   - **Expense Breakdown Chart:** Doughnut chart rendered with Chart.js using warm orange shades (`#F97316`, `#FB923C`, `#FDBA74`, `#FED7AA`).
-   - **Income vs Expense Bar Chart:** 6-month side-by-side comparison.
-   - **Recent Transactions:** Last 5 entries with quick Edit / Delete actions.
-   - **Floating Action Button (`+`):** Bottom-right quick entry launcher.
-
-3. **Transactions Page (`/transactions`)**
-   - Full chronological ledger with newest entries first.
-   - Filter bar: Filter by Month, Category, or Type (All / Income / Expense).
-   - Incomes highlighted in Green (`+₹`), Expenses in Red (`-₹`).
-   - Edit (✏️) and Delete (🗑️) on every row.
-
-4. **Add / Edit Transaction Modal**
-   - Universal popup modal overlay accessible across pages.
-   - Segmented toggle between Income and Expense.
-   - Dynamic Category selector based on type:
-     - Expense: `Food`, `Rent`, `Transport`, `Entertainment`, `Shopping`, `Health`, `Others`.
-     - Income: `Salary`, `Freelance`, `Gift`, `Others`.
-     - Real-time validation for positive amount, date, and category.
-
-5. **Budgets Page (`/budgets`)**
-   - Category cards for all 7 expense categories.
-   - Shows monthly limit, spent amount, remaining balance, and usage percentage.
-   - Intelligent progress bar: Orange under 85%, Red when spending crosses 85%.
-   - Inline "Set Limit" button to adjust monthly budgets directly on each card without page reloads.
-
-6. **History Page (`/history`)**
-   - 6-month summary table: Month, Total Income, Total Expenses, Net Savings.
-   - Net Savings displayed in Green for surplus months and Red for deficit months.
-   - Pre-seeded with 6 months of realistic data, including months with expenses exceeding income.
+- **Currency:** Indian Rupee `₹`
+- **Intelligent Dual-Color Progress Bars**:
+  - **Orange (`#F97316`)** when spending $\le 85\%$ of the category budget limit.
+  - **Red (`#EF4444`)** when category spending crosses $> 85\%$ (e.g. `Stationery` at $94.7\%$ and `Phone Recharge` at $89.9\%$).
+- **6-Month Financial Ledger**:
+  - Highlights surplus months in **Green** (`+₹`).
+  - Highlights deficit months in **Red** (`-₹`) (e.g. August semester commencement with hostel fee payments).
 
 ---
 
 ## 📁 Project Architecture
 ```
 spendwise/
-├── app.py              # Flask server, routing, Jinja2 filters, API endpoints
-├── database.py         # SQLite schema initialization and connection management
-├── seed.py             # Automatic dummy data generator (6 months of transactions & budgets)
-├── requirements.txt    # Project dependencies
-├── README.md           # Documentation
+├── app.py                     # Flask server with student categories & JSON APIs
+├── database.py                # SQLite schema and connection manager
+├── seed.py                    # 6-Month realistic student dummy data generator
+├── test_spendwise.py          # Complete student test suite
+├── requirements.txt           # Dependencies (Flask, Werkzeug)
+├── README.md                  # Student edition documentation
 ├── static/
 │   ├── css/
-│   │   └── style.css   # Custom dark mode styles, buttons, cards, modals, transitions
+│   │   └── style.css          # Dark theme styles, inputs, cards, tables, modal
 │   └── js/
-│       ├── main.js     # Modal management, category toggle, inline budget edits, AJAX calls
-│       ├── charts.js   # Chart.js initialization for Doughnut and Bar charts
-│       └── chart.min.js# Bundled Chart.js fallback
+│       ├── main.js            # Student categories switcher, modal, AJAX CRUD
+│       ├── charts.js          # Chart.js Doughnut & Bar visualizations
+│       └── chart.min.js       # Bundled Chart.js fallback script
 └── templates/
-    ├── base.html       # Base layout with navbar, modal container, FAB button
-    ├── auth.html       # Login and registration view
-    ├── dashboard.html  # Dashboard with summary metrics, charts, recent transactions
-    ├── transactions.html # Full transaction log with filters and actions
-    ├── budgets.html    # Budget limit cards with dual-color progress bars
-    └── history.html    # 6-Month financial ledger
+    ├── base.html              # Base layout with navbar, modal & FAB button
+    ├── auth.html              # Student login & registration
+    ├── dashboard.html         # Campus & semester financial overview
+    ├── transactions.html      # Filterable transaction ledger
+    ├── budgets.html           # Category spending limits & dual-color progress bars
+    └── history.html           # 6-Month surplus / deficit ledger
 ```

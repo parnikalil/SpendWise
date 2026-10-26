@@ -46,13 +46,16 @@ function renderExpensePieChart(canvas, chartData) {
   }
 
   const orangeShades = [
-    '#F97316', // Primary orange
+    '#F97316', // Primary vibrant orange
     '#FB923C', // Amber orange
     '#FDBA74', // Peach orange
     '#FED7AA', // Soft pale orange
     '#EA580C', // Deep burnt orange
     '#C2410C', // Dark rust orange
-    '#9A3412'  // Deep earthy orange
+    '#9A3412', // Deep earthy orange
+    '#FF7A00', // Electric orange
+    '#D97706', // Warm amber
+    '#F59E0B'  // Golden yellow-orange
   ];
 
   new Chart(ctx, {

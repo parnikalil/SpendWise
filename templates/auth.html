@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}SpendWise — Login & Register{% endblock %}
+{% block title %}SpendWise — Student Login & Register{% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
@@ -10,13 +10,13 @@
         <span class="brand-icon">₹</span>
         <span>SpendWise</span>
       </div>
-      <p class="page-subtitle">Master your money with clarity and control.</p>
+      <p class="page-subtitle" style="font-weight: 500;">B.Tech. Student Edition • Smart Campus Finance</p>
     </div>
 
     <!-- Toggle between Login & Register -->
     <div class="auth-tabs">
       <button type="button" class="auth-tab-btn {% if active_tab != 'register' %}active{% endif %}" id="tabLoginBtn">
-        Log In
+        Student Log In
       </button>
       <button type="button" class="auth-tab-btn {% if active_tab == 'register' %}active{% endif %}" id="tabRegisterBtn">
         Create Account
@@ -26,18 +26,18 @@
     <!-- Demo Credentials Quick Access Hint -->
     <div class="demo-account-hint">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong>⚡ Test Demo Account:</strong>
-        <span style="font-size:0.75rem; opacity:0.8;">Auto-seeded</span>
+        <strong>🎓 Demo Account: Parnika Lilani</strong>
+        <span style="font-size:0.75rem; background: rgba(249,115,22,0.2); padding: 2px 6px; border-radius: 4px;">B.Tech Student</span>
       </div>
-      <span>Email: <code>test@spendwise.com</code> | Pass: <code>test123</code></span>
-      <button type="button" id="useDemoCredsBtn">Use Demo Credentials</button>
+      <span>Email: <code>parnika@spendwise.com</code> | Pass: <code>test123</code></span>
+      <button type="button" id="useDemoCredsBtn">⚡ Login as Parnika Lilani</button>
     </div>
 
     <!-- LOGIN FORM -->
     <form id="loginForm" action="{{ url_for('login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" method="POST" style="{% if active_tab == 'register' %}display: none;{% endif %}">
       <div class="form-group">
-        <label class="form-label" for="loginEmail">Email Address</label>
-        <input type="email" id="loginEmail" name="email" class="form-control" placeholder="name@example.com" value="{{ email or '' }}" required autofocus>
+        <label class="form-label" for="loginEmail">Student Email Address</label>
+        <input type="email" id="loginEmail" name="email" class="form-control" placeholder="parnika@spendwise.com" value="{{ email or '' }}" required autofocus>
       </div>
 
       <div class="form-group">
@@ -46,7 +46,7 @@
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
-        Sign In to SpendWise
+        Sign In to Student Portal
       </button>
     </form>
 
@@ -54,12 +54,12 @@
     <form id="registerForm" action="{{ url_for('register') }}" method="POST" style="{% if active_tab != 'register' %}display: none;{% endif %}">
       <div class="form-group">
         <label class="form-label" for="regName">Full Name</label>
-        <input type="text" id="regName" name="name" class="form-control" placeholder="Alex Morgan" value="{{ name or '' }}" required>
+        <input type="text" id="regName" name="name" class="form-control" placeholder="Parnika Lilani" value="{{ name or '' }}" required>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="regEmail">Email Address</label>
-        <input type="email" id="regEmail" name="email" class="form-control" placeholder="alex@example.com" value="{{ email or '' }}" required>
+        <label class="form-label" for="regEmail">Student Email Address</label>
+        <input type="email" id="regEmail" name="email" class="form-control" placeholder="parnika@spendwise.com" value="{{ email or '' }}" required>
       </div>
 
       <div class="form-group">
@@ -68,7 +68,7 @@
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
-        Create My Account
+        Create Student Account
       </button>
     </form>
 
@@ -103,7 +103,7 @@
   if (useDemoCredsBtn) {
     useDemoCredsBtn.addEventListener('click', () => {
       tabLoginBtn.click();
-      document.getElementById('loginEmail').value = 'test@spendwise.com';
+      document.getElementById('loginEmail').value = 'parnika@spendwise.com';
       document.getElementById('loginPassword').value = 'test123';
       loginForm.querySelector('button[type="submit"]').focus();
     });

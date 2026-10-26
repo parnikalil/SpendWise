@@ -19,199 +19,259 @@ def seed_data():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Check if test user already exists
-    cursor.execute("SELECT id FROM users WHERE email = ?", ("test@spendwise.com",))
+    # Check if student account already exists
+    cursor.execute("SELECT id FROM users WHERE email = ? OR email = ?", ("parnika@spendwise.com", "test@spendwise.com"))
     existing_user = cursor.fetchone()
+
+    password_hash = generate_password_hash("test123")
 
     if existing_user:
         user_id = existing_user["id"]
-        # Check if transactions already exist
+        # Update name if needed
+        cursor.execute("UPDATE users SET name = 'Parnika Lilani', email = 'parnika@spendwise.com' WHERE id = ?", (user_id,))
+        # Check if transactions exist
         cursor.execute("SELECT COUNT(*) as count FROM transactions WHERE user_id = ?", (user_id,))
         if cursor.fetchone()["count"] > 0:
-            print("Seed data already present. Skipping.")
-            conn.close()
-            return
+            # Let's refresh data to ensure the new student categories and realistic student expenses are loaded
+            cursor.execute("DELETE FROM transactions WHERE user_id = ?", (user_id,))
+            cursor.execute("DELETE FROM budgets WHERE user_id = ?", (user_id,))
+            conn.commit()
     else:
-        # Create test user
-        password_hash = generate_password_hash("test123")
+        # Create Parnika Lilani student user
         cursor.execute("""
             INSERT INTO users (name, email, password_hash)
             VALUES (?, ?, ?)
-        """, ("Alex Morgan", "test@spendwise.com", password_hash))
+        """, ("Parnika Lilani", "parnika@spendwise.com", password_hash))
         user_id = cursor.lastrowid
-        print(f"Created test user: test@spendwise.com with ID: {user_id}")
+        print(f"Created B.Tech student account: Parnika Lilani (parnika@spendwise.com)")
+
+    # Also ensure test@spendwise.com exists as an alias for compatibility
+    cursor.execute("SELECT id FROM users WHERE email = 'test@spendwise.com'")
+    if not cursor.fetchone() and existing_user is None:
+        cursor.execute("""
+            INSERT INTO users (name, email, password_hash)
+            VALUES (?, ?, ?)
+        """, ("Parnika Lilani", "test@spendwise.com", password_hash))
 
     today = datetime.date.today()
 
-    # We will generate data for 6 months (current month + 5 previous months)
-    # Month 0: current month (positive savings)
-    # Month 1: 1 month ago (positive savings)
-    # Month 2: 2 months ago (NEGATIVE savings, expenses exceed income)
-    # Month 3: 3 months ago (positive savings)
-    # Month 4: 4 months ago (NEGATIVE savings, expenses exceed income)
-    # Month 5: 5 months ago (positive savings)
+    # B.Tech Engineering Student (Parnika Lilani) Data:
+    # Categories:
+    # Expenses: Hostel Fees, Food, Fuel, Travel, Stationery, Phone Recharge, Tech & Books, Entertainment, Others
+    # Incomes: Allowance, Internship Stipend, Freelance, Scholarship, Others
 
     months_data = [
-        # (offset, incomes, expenses, budgets)
-        # offset 0: Current Month (e.g. Oct 2026)
+        # ---------------------------------------------------------
+        # offset 0: Current Month (e.g. October 2026) — Active Semester
+        # ---------------------------------------------------------
         (
             0,
             [
-                ("Salary", 75000.0, 1, "Monthly tech salary"),
-                ("Freelance", 18500.0, 15, "Landing page UI design")
+                ("Allowance", 18000.0, 1, "Monthly allowance from parents"),
+                ("Internship Stipend", 15000.0, 12, "Frontend developer intern stipend (Remote)"),
+                ("Freelance", 6500.0, 20, "Python automation script for college senior")
             ],
             [
-                ("Rent", 22000.0, 2, "Apartment rent"),
-                ("Food", 3200.0, 4, "Whole Foods grocery haul"),
-                ("Transport", 1450.0, 7, "Fuel & Metro recharge"),
-                ("Entertainment", 2800.0, 10, "Concert tickets & drinks"),
-                ("Health", 4500.0, 12, "Dentist checkup & vitamins"),
-                ("Shopping", 9200.0, 14, "Mechanical keyboard & monitor arm"),
-                ("Food", 2850.0, 18, "Dinner with college friends"),
-                ("Others", 1600.0, 21, "Cloud server & domain renewal"),
-                ("Transport", 850.0, 24, "Weekend cab rides"),
-                ("Food", 1900.0, 25, "Weekly veggies & pantry stock")
+                # Total In: 39,500. Total Out: ~21,689. Surplus: ~17,811 (Positive, Green)
+                ("Hostel Fees", 8500.0, 2, "Monthly hostel accommodation & mess fee"),
+                ("Food", 1250.0, 4, "Hostel canteen lunch & evening chai-samosa"),
+                ("Fuel", 650.0, 6, "Activa scooty petrol for college & lab commute"),
+                ("Stationery", 780.0, 8, "Engineering drawing sheets & lab manual journals"),
+                ("Phone Recharge", 899.0, 10, "Airtel 5G 3-month unlimited data plan"), # >85% of 1000 limit -> RED
+                ("Food", 450.0, 13, "Midnight Maggi & cold coffee during quiz prep"),
+                ("Travel", 600.0, 15, "Metro card recharge for city project commute"),
+                ("Stationery", 640.0, 18, "Final project printouts, spiral binding & chart papers"), # Total Stationery: 1420 / 1500 limit (94.7%) -> RED
+                ("Tech & Books", 1290.0, 21, "Data Structures & Algorithms reference handbook"),
+                ("Entertainment", 1200.0, 22, "College Tech Fest Hackathon entry fee & team snacks"),
+                ("Food", 850.0, 23, "Weekend dinner with wingmates after exam submission"),
+                ("Fuel", 550.0, 24, "Petrol top-up for weekend library commute"),
+                ("Food", 680.0, 25, "Campus bakery sandwich & juices"),
+                ("Others", 450.0, 26, "Hostel laundry & ironing charges")
             ],
-            # Budgets: category -> limit
-            # Notice Shopping (9200 / 10000 = 92% -> RED > 85%)
-            # Rent (22000 / 25000 = 88% -> RED > 85%)
-            # Food (7950 / 12000 = 66% -> ORANGE)
+            # Budgets for Current Month:
+            # Stationery (1420 / 1500 = 94.7% -> RED > 85%)
+            # Phone Recharge (899 / 1000 = 89.9% -> RED > 85%)
+            # Others are comfortably under 85% (ORANGE)
             {
-                "Food": 12000.0,
-                "Rent": 25000.0,
-                "Transport": 5000.0,
-                "Entertainment": 6000.0,
-                "Shopping": 10000.0,
-                "Health": 8000.0,
-                "Others": 4000.0
+                "Hostel Fees": 12000.0,
+                "Food": 5500.0,
+                "Fuel": 2000.0,
+                "Travel": 2500.0,
+                "Stationery": 1500.0,
+                "Phone Recharge": 1000.0,
+                "Tech & Books": 3000.0,
+                "Entertainment": 2000.0,
+                "Others": 1500.0
             }
         ),
-        # offset 1: 1 month ago (e.g. Sep 2026) - Positive savings
+
+        # ---------------------------------------------------------
+        # offset 1: 1 Month Ago (e.g. September 2026) — Mid-Term Exams
+        # ---------------------------------------------------------
         (
             1,
             [
-                ("Salary", 75000.0, 1, "Monthly tech salary"),
-                ("Gift", 5000.0, 18, "Birthday gift from family")
+                ("Allowance", 18000.0, 1, "Monthly allowance from parents"),
+                ("Internship Stipend", 15000.0, 10, "Frontend developer intern stipend")
             ],
             [
-                ("Rent", 22000.0, 2, "Apartment rent"),
-                ("Food", 8400.0, 5, "Groceries and meal kit delivery"),
-                ("Shopping", 5500.0, 9, "Autumn wardrobe basics"),
-                ("Transport", 3100.0, 14, "Commute passes & fuel"),
-                ("Entertainment", 3400.0, 20, "Movie night & dining out"),
-                ("Health", 1800.0, 23, "Eye exam & lens solution"),
-                ("Others", 1200.0, 27, "Software subscriptions")
+                ("Hostel Fees", 8500.0, 2, "Hostel room & mess monthly installment"),
+                ("Food", 2400.0, 5, "Canteen meals & cafeteria snacks"),
+                ("Fuel", 1100.0, 8, "Scooty fuel for mid-term exam commute"),
+                ("Stationery", 820.0, 11, "Scientific calculator Casio fx-991CW battery & notebooks"),
+                ("Phone Recharge", 350.0, 14, "Hostel room shared high-speed WiFi contribution"),
+                ("Travel", 850.0, 17, "Metro pass recharge for coaching & college"),
+                ("Tech & Books", 649.0, 20, "Coursera Machine Learning certification course"),
+                ("Entertainment", 950.0, 24, "Post mid-term movie with hostel friends"),
+                ("Others", 580.0, 27, "Campus medical store pharmacy & headache balm")
             ],
             {
-                "Food": 12000.0,
-                "Rent": 25000.0,
-                "Transport": 5000.0,
-                "Entertainment": 6000.0,
-                "Shopping": 8000.0,
-                "Health": 6000.0,
-                "Others": 4000.0
+                "Hostel Fees": 12000.0,
+                "Food": 5500.0,
+                "Fuel": 2000.0,
+                "Travel": 2500.0,
+                "Stationery": 1500.0,
+                "Phone Recharge": 1000.0,
+                "Tech & Books": 3000.0,
+                "Entertainment": 2000.0,
+                "Others": 1500.0
             }
         ),
-        # offset 2: 2 months ago (e.g. Aug 2026) - NEGATIVE SAVINGS (Expenses > Income)
+
+        # ---------------------------------------------------------
+        # offset 2: 2 Months Ago (e.g. August 2026) — SEMESTER COMMENCEMENT (Expenses > Income -> RED DEFICIT)
+        # ---------------------------------------------------------
         (
             2,
             [
-                ("Salary", 75000.0, 1, "Monthly tech salary")
+                ("Allowance", 20000.0, 1, "Semester start allowance from parents"),
+                ("Internship Stipend", 15000.0, 15, "Frontend developer intern stipend")
             ],
             [
-                ("Rent", 22000.0, 2, "Apartment rent"),
-                ("Health", 28500.0, 6, "Emergency dental root canal surgery"),
-                ("Shopping", 24000.0, 11, "Workstation desk & ergonomic chair"),
-                ("Food", 9200.0, 15, "Monthly dining & groceries"),
-                ("Transport", 4100.0, 19, "Car servicing & petrol"),
-                ("Entertainment", 4500.0, 22, "Weekend club & outing"),
-                ("Others", 3200.0, 26, "Annual tax consultant fee")
+                # Total Income: 35,000. Total Expense: 52,240. Deficit: -17,240 (RED DEFICIT)
+                ("Hostel Fees", 28000.0, 2, "Odd semester hostel room & mess fee payment"),
+                ("Stationery", 3450.0, 5, "Casio fx-991CW calculator, mini drafter & B.Tech books"),
+                ("Tech & Books", 5800.0, 8, "Core Engineering textbooks & Cloud lab subscription"),
+                ("Travel", 2200.0, 11, "Semester return train tickets & luggage transit"),
+                ("Food", 4800.0, 14, "Mess advance & orientation week dining"),
+                ("Fuel", 1400.0, 18, "Scooty petrol for semester onboarding"),
+                ("Phone Recharge", 899.0, 21, "Jio 5G semester unlimited data pack"),
+                ("Entertainment", 3200.0, 24, "Freshers welcome fest ticket & college society t-shirt"),
+                ("Others", 2490.0, 27, "Hostel room mattress, bucket, study lamp & locks")
             ],
             {
-                "Food": 12000.0,
-                "Rent": 25000.0,
-                "Transport": 5000.0,
-                "Entertainment": 6000.0,
-                "Shopping": 10000.0,
-                "Health": 10000.0,
-                "Others": 4000.0
+                "Hostel Fees": 30000.0,
+                "Food": 6000.0,
+                "Fuel": 2000.0,
+                "Travel": 3000.0,
+                "Stationery": 4000.0,
+                "Phone Recharge": 1000.0,
+                "Tech & Books": 6000.0,
+                "Entertainment": 3500.0,
+                "Others": 3000.0
             }
         ),
-        # offset 3: 3 months ago (e.g. Jul 2026) - Positive savings
+
+        # ---------------------------------------------------------
+        # offset 3: 3 Months Ago (e.g. July 2026) — Summer Internship & Scholarship (GREEN SURPLUS)
+        # ---------------------------------------------------------
         (
             3,
             [
-                ("Salary", 75000.0, 1, "Monthly tech salary"),
-                ("Freelance", 25000.0, 20, "Full-stack client API integration")
+                ("Scholarship", 25000.0, 5, "University Academic Merit Scholarship award"),
+                ("Internship Stipend", 18000.0, 10, "Summer Software Intern stipend"),
+                ("Allowance", 12000.0, 12, "Allowance from parents")
             ],
             [
-                ("Rent", 22000.0, 2, "Apartment rent"),
-                ("Food", 11300.0, 5, "Summer BBQ supplies & dining"),
-                ("Entertainment", 7200.0, 12, "Music festival weekend passes"),
-                ("Shopping", 6500.0, 16, "Sneakers and summer apparel"),
-                ("Transport", 3800.0, 21, "Fuel and highway tolls"),
-                ("Health", 2100.0, 25, "Annual health checkup"),
-                ("Others", 2000.0, 28, "Home utilities")
+                # Total In: 55,000. Total Out: 23,450. Surplus: +31,550 (GREEN SURPLUS)
+                ("Hostel Fees", 8500.0, 2, "Summer hostel accommodation charges"),
+                ("Food", 4200.0, 6, "Internship office canteen lunches & tea"),
+                ("Travel", 2800.0, 12, "Metro daily pass for tech park commute"),
+                ("Fuel", 1250.0, 16, "Scooty petrol for tech campus"),
+                ("Tech & Books", 2400.0, 19, "LeetCode Premium 1-year student subscription"),
+                ("Stationery", 650.0, 22, "Coding notebook, sticky notes & pens"),
+                ("Phone Recharge", 350.0, 24, "Monthly data booster add-on"),
+                ("Entertainment", 2100.0, 26, "Internship team lunch & bowling outing"),
+                ("Others", 1200.0, 28, "Professional formal clothes for intern presentation")
             ],
             {
-                "Food": 12000.0,
-                "Rent": 25000.0,
-                "Transport": 5000.0,
-                "Entertainment": 8000.0,
-                "Shopping": 8000.0,
-                "Health": 6000.0,
-                "Others": 4000.0
+                "Hostel Fees": 12000.0,
+                "Food": 5500.0,
+                "Fuel": 2000.0,
+                "Travel": 3000.0,
+                "Stationery": 1500.0,
+                "Phone Recharge": 1000.0,
+                "Tech & Books": 3000.0,
+                "Entertainment": 2500.0,
+                "Others": 1500.0
             }
         ),
-        # offset 4: 4 months ago (e.g. Jun 2026) - NEGATIVE SAVINGS (Expenses > Income)
+
+        # ---------------------------------------------------------
+        # offset 4: 4 Months Ago (e.g. June 2026) — Semester End Travel & Gear (RED DEFICIT)
+        # ---------------------------------------------------------
         (
             4,
             [
-                ("Salary", 75000.0, 1, "Monthly tech salary")
+                ("Allowance", 16000.0, 1, "Allowance from parents"),
+                ("Freelance", 8000.0, 20, "Web design for college society website")
             ],
             [
-                ("Rent", 22000.0, 2, "Apartment rent"),
-                ("Shopping", 32000.0, 8, "Smart TV & soundbar for living room"),
-                ("Entertainment", 14500.0, 13, "Flight tickets for summer retreat"),
-                ("Food", 10200.0, 17, "Restaurants and specialty grocery"),
-                ("Transport", 5100.0, 22, "Cab rides during travel"),
-                ("Others", 2800.0, 25, "Luggage repair and insurance"),
-                ("Health", 1500.0, 27, "Travel vaccinations & first aid")
+                # Total In: 24,000. Total Out: 38,150. Deficit: -14,150 (RED DEFICIT)
+                ("Hostel Fees", 8500.0, 2, "Hostel mess & room clearance"),
+                ("Travel", 6500.0, 6, "Flight / AC Train ticket back home for summer vacation"),
+                ("Tech & Books", 12500.0, 10, "Laptop SSD & RAM upgrade for Engineering CAD & coding"),
+                ("Food", 3400.0, 14, "Travel meals and semester end farewell party"),
+                ("Stationery", 1850.0, 17, "Semester project hardbound thesis printing & binding"),
+                ("Fuel", 950.0, 21, "Commute to railway station and courier service"),
+                ("Phone Recharge", 899.0, 24, "3-month vacation roaming mobile plan"),
+                ("Entertainment", 2400.0, 26, "Farewell celebration with B.Tech classmates"),
+                ("Others", 1150.0, 28, "Hostel room luggage packing cartons & courier home")
             ],
             {
-                "Food": 12000.0,
-                "Rent": 25000.0,
-                "Transport": 5000.0,
-                "Entertainment": 10000.0,
-                "Shopping": 15000.0,
-                "Health": 5000.0,
-                "Others": 4000.0
+                "Hostel Fees": 12000.0,
+                "Food": 5500.0,
+                "Fuel": 2000.0,
+                "Travel": 7000.0,
+                "Stationery": 2000.0,
+                "Phone Recharge": 1000.0,
+                "Tech & Books": 13000.0,
+                "Entertainment": 2500.0,
+                "Others": 1500.0
             }
         ),
-        # offset 5: 5 months ago (e.g. May 2026) - Positive savings
+
+        # ---------------------------------------------------------
+        # offset 5: 5 Months Ago (e.g. May 2026) — Even Semester Exams (GREEN SURPLUS)
+        # ---------------------------------------------------------
         (
             5,
             [
-                ("Salary", 75000.0, 1, "Monthly tech salary"),
-                ("Freelance", 12000.0, 14, "Mobile app bug fixes")
+                ("Allowance", 18000.0, 1, "Monthly allowance from parents"),
+                ("Freelance", 12000.0, 14, "Python Django backend API task for start-up")
             ],
             [
-                ("Rent", 22000.0, 2, "Apartment rent"),
-                ("Food", 8100.0, 6, "Groceries & organic farmers market"),
-                ("Shopping", 4200.0, 10, "Kindle books & kitchen cookware"),
-                ("Entertainment", 3600.0, 16, "Escape room & dinner with team"),
-                ("Transport", 2900.0, 20, "Fuel & parking permits"),
-                ("Health", 1200.0, 24, "Gym membership renewal"),
-                ("Others", 1500.0, 27, "Broadband fiber internet")
+                # Total In: 30,000. Total Out: 19,450. Surplus: +10,550 (GREEN SURPLUS)
+                ("Hostel Fees", 8500.0, 2, "Monthly hostel accommodation & mess fee"),
+                ("Food", 3100.0, 6, "Hostel mess & night canteen coffee/bun-maska"),
+                ("Fuel", 950.0, 10, "Scooty fuel for university exam center"),
+                ("Stationery", 1200.0, 15, "Semester exam answer sheets, graph pads & geometry box"),
+                ("Phone Recharge", 350.0, 18, "Hostel WiFi top-up"),
+                ("Travel", 1150.0, 21, "Auto & metro rides during practical exam week"),
+                ("Tech & Books", 1800.0, 24, "Database Systems & Operating Systems guidebooks"),
+                ("Entertainment", 1400.0, 27, "Post-exam celebration dinner with project partners"),
+                ("Others", 1000.0, 28, "Semester examination admit card & university fees")
             ],
             {
-                "Food": 12000.0,
-                "Rent": 25000.0,
-                "Transport": 5000.0,
-                "Entertainment": 6000.0,
-                "Shopping": 6000.0,
-                "Health": 5000.0,
-                "Others": 4000.0
+                "Hostel Fees": 12000.0,
+                "Food": 5500.0,
+                "Fuel": 2000.0,
+                "Travel": 2500.0,
+                "Stationery": 1500.0,
+                "Phone Recharge": 1000.0,
+                "Tech & Books": 3000.0,
+                "Entertainment": 2000.0,
+                "Others": 1500.0
             }
         ),
     ]
@@ -221,7 +281,6 @@ def seed_data():
 
         # Insert Incomes
         for cat, amt, day, note in incomes:
-            # Ensure day doesn't exceed current day if offset == 0
             actual_day = min(day, today.day if offset == 0 else 28)
             date_str = f"{year:04d}-{month:02d}-{actual_day:02d}"
             cursor.execute("""
@@ -249,7 +308,7 @@ def seed_data():
 
     conn.commit()
     conn.close()
-    print("Seed data successfully inserted for user test@spendwise.com!")
+    print("Seed data successfully inserted for B.Tech student Parnika Lilani (parnika@spendwise.com)!")
 
 if __name__ == '__main__':
     seed_data()

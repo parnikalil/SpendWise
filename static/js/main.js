@@ -11,22 +11,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initAlertDismissal();
 });
 
-// Category definitions
+// B.Tech Student Category Definitions
 const CATEGORIES = {
   Expense: [
+    { name: 'Hostel Fees', icon: '🏠' },
     { name: 'Food', icon: '🍔' },
-    { name: 'Rent', icon: '🏠' },
-    { name: 'Transport', icon: '🚗' },
+    { name: 'Fuel', icon: '⛽' },
+    { name: 'Travel', icon: '🚆' },
+    { name: 'Stationery', icon: '📚' },
+    { name: 'Phone Recharge', icon: '📱' },
+    { name: 'Tech & Books', icon: '💻' },
     { name: 'Entertainment', icon: '🎬' },
-    { name: 'Shopping', icon: '🛍️' },
-    { name: 'Health', icon: '💊' },
     { name: 'Others', icon: '📦' }
   ],
   Income: [
-    { name: 'Salary', icon: '💼' },
+    { name: 'Allowance', icon: '💵' },
+    { name: 'Internship Stipend', icon: '💼' },
     { name: 'Freelance', icon: '💻' },
-    { name: 'Gift', icon: '🎁' },
-    { name: 'Others', icon: '📦' }
+    { name: 'Scholarship', icon: '🎓' },
+    { name: 'Others', icon: '🎁' }
   ]
 };
 
