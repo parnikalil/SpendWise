@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SpendWise — Smart Personal Finance Tracker{% endblock %}</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Dark Theme CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Chart.js CDN with Local Fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script>
+    if (typeof Chart === 'undefined') {
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = "{{ url_for('static', filename='js/chart.min.js') }}";
+      document.head.appendChild(fallbackScript);
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('dashboard') if current_user else url_for('login') }}" class="brand-logo">
+        <span class="brand-icon">₹</span>
+        <span>SpendWise</span>
+      </a>
+
+      {% if current_user %}
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li>
+          <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == url_for('dashboard') %}active{% endif %}">
+            <span>📊</span> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('transactions') }}" class="nav-link {% if request.path == url_for('transactions') %}active{% endif %}">
+            <span>💳</span> Transactions
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('budgets') }}" class="nav-link {% if request.path == url_for('budgets') %}active{% endif %}">
+            <span>🎯</span> Budgets
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('history') }}" class="nav-link {% if request.path == url_for('history') %}active{% endif %}">
+            <span>📜</span> History
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-user">
+        <div class="user-badge" title="{{ current_user.email }}">
+          <div class="user-avatar">{{ current_user.name[0]|upper }}</div>
+          <span>{{ current_user.name }}</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Flash Notification Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alert-container">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ 'error' if category == 'error' else (category if category in ['success', 'warning', 'info'] else 'info') }}">
+        <span>{{ message }}</span>
+        <button class="alert-close">&times;</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Content Block -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if current_user %}
+  <!-- Floating Action Button (+) for Quick Transaction Entry -->
+  <button class="fab-btn" data-open-add-modal title="Quick Add Transaction" aria-label="Add Transaction">
+    +
+  </button>
+
+  <!-- Add / Edit Transaction Modal Overlay -->
+  <div class="modal-backdrop" id="transactionModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add Transaction</h2>
+        <button class="modal-close" data-close-modal aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="transactionForm">
+        <input type="hidden" id="txId" name="id" value="">
+        <input type="hidden" id="txType" name="type" value="Expense">
+
+        <div class="modal-body">
+          <div id="modalError" class="alert alert-error" style="display: none; margin-bottom: 1.25rem;"></div>
+
+          <!-- Type Toggle: Expense / Income -->
+          <div class="type-toggle-group">
+            <button type="button" class="type-toggle-btn active expense" id="typeExpenseBtn">
+              <span>📉</span> Expense
+            </button>
+            <button type="button" class="type-toggle-btn" id="typeIncomeBtn">
+              <span>📈</span> Income
+            </button>
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label class="form-label" for="txAmount">Amount (₹) *</label>
+            <input type="number" step="0.01" min="0.01" id="txAmount" class="form-control" placeholder="e.g. 1500" required>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label" for="txCategory">Category *</label>
+            <select id="txCategory" class="form-control" required>
+              <option value="">Select Category</option>
+              {% for cat in expense_categories %}
+              <option value="{{ cat }}">{{ category_icons.get(cat, '📦') }} {{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Date -->
+          <div class="form-group">
+            <label class="form-label" for="txDate">Date *</label>
+            <input type="date" id="txDate" class="form-control" value="{{ today_str }}" required>
+          </div>
+
+          <!-- Note -->
+          <div class="form-group">
+            <label class="form-label" for="txNote">Note (optional)</label>
+            <input type="text" id="txNote" class="form-control" placeholder="e.g. Grocery shopping, Freelance payment">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveTxBtn">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Global Application Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

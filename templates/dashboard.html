@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}SpendWise — Financial Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Financial Dashboard</h1>
+    <p class="page-subtitle">Overview for {{ month_label }}</p>
+  </div>
+  <button class="btn btn-primary" data-open-add-modal>
+    <span>+</span> Add Transaction
+  </button>
+</div>
+
+<!-- 3 Summary Cards -->
+<div class="summary-grid">
+  <!-- Total Income (this month) -->
+  <div class="summary-card income">
+    <div class="summary-header">
+      <span class="summary-label">Total Income (This Month)</span>
+      <div class="summary-icon">💰</div>
+    </div>
+    <div class="summary-value" style="color: var(--color-green);">
+      {{ total_income | currency }}
+    </div>
+    <div class="summary-subtext">Earned in {{ month_label }}</div>
+  </div>
+
+  <!-- Total Expense (this month) -->
+  <div class="summary-card expense">
+    <div class="summary-header">
+      <span class="summary-label">Total Expense (This Month)</span>
+      <div class="summary-icon">💳</div>
+    </div>
+    <div class="summary-value" style="color: var(--accent-orange);">
+      {{ total_expense | currency }}
+    </div>
+    <div class="summary-subtext">Spent in {{ month_label }}</div>
+  </div>
+
+  <!-- Current Balance -->
+  <div class="summary-card balance">
+    <div class="summary-header">
+      <span class="summary-label">Net Balance (This Month)</span>
+      <div class="summary-icon">⚖️</div>
+    </div>
+    <div class="summary-value" style="color: {% if current_balance >= 0 %}#38BDF8{% else %}var(--color-red){% endif %};">
+      {{ current_balance | currency }}
+    </div>
+    <div class="summary-subtext">
+      {% if current_balance >= 0 %}
+      Savings rate: {{ ((current_balance / total_income) * 100)|round(1) if total_income > 0 else 0 }}%
+      {% else %}
+      Deficit: Spent more than income
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="charts-grid">
+  <!-- Pie / Doughnut Chart: Expense Breakdown This Month -->
+  <div class="card chart-card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <span>🍩</span> Expense Breakdown
+      </h2>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">{{ month_label }}</span>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="expensePieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Bar Chart: Income vs Expense for Last 6 Months Side-by-Side -->
+  <div class="card chart-card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <span>📊</span> Income vs Expense
+      </h2>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Last 6 Months</span>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="incomeExpenseBarChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Transactions Section -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">
+      <span>⏱️</span> Recent Transactions
+    </h2>
+    <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm">
+      View All Transactions &rarr;
+    </a>
+  </div>
+
+  {% if recent_transactions %}
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Note</th>
+          <th style="text-align: right;">Amount</th>
+          <th style="text-align: center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in recent_transactions %}
+        <tr id="tx-row-{{ tx.id }}">
+          <td style="white-space: nowrap; font-size: 0.88rem; color: var(--text-muted);">
+            {{ tx.date | format_date }}
+          </td>
+          <td>
+            <span class="badge-category">
+              <span>{{ category_icons.get(tx.category, '📦') }}</span>
+              <span>{{ tx.category }}</span>
+            </span>
+          </td>
+          <td style="color: var(--text-secondary); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ tx.note or '—' }}
+          </td>
+          <td style="text-align: right;">
+            {% if tx.type == 'Income' %}
+            <span class="amount-income">+{{ tx.amount | currency }}</span>
+            {% else %}
+            <span class="amount-expense">-{{ tx.amount | currency }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            <div class="action-buttons" style="justify-content: center;">
+              <button class="btn-icon" data-edit-tx="{{ tx.id }}" title="Edit transaction" aria-label="Edit">
+                ✏️
+              </button>
+              <button class="btn-icon delete" data-delete-tx="{{ tx.id }}" title="Delete transaction" aria-label="Delete">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+    <p style="font-size: 1.5rem; margin-bottom: 0.5rem;">💳</p>
+    <p>No transactions found for this account.</p>
+    <button class="btn btn-primary btn-sm" data-open-add-modal style="margin-top: 1rem;">
+      + Add First Transaction
+    </button>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

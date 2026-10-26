@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}SpendWise — 6-Month Financial History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Financial History</h1>
+    <p class="page-subtitle">Monthly breakdown of income, expenses, and net savings across the last 6 months</p>
+  </div>
+</div>
+
+<!-- 6-Month Aggregate Cards -->
+<div class="summary-grid" style="margin-bottom: 2rem;">
+  <div class="summary-card income">
+    <div class="summary-header">
+      <span class="summary-label">6-Month Total Income</span>
+      <div class="summary-icon">📈</div>
+    </div>
+    <div class="summary-value" style="color: var(--color-green);">
+      {{ total_income_all | currency }}
+    </div>
+    <div class="summary-subtext">Across past 6 months</div>
+  </div>
+
+  <div class="summary-card expense">
+    <div class="summary-header">
+      <span class="summary-label">6-Month Total Expenses</span>
+      <div class="summary-icon">📉</div>
+    </div>
+    <div class="summary-value" style="color: var(--accent-orange);">
+      {{ total_expense_all | currency }}
+    </div>
+    <div class="summary-subtext">Across past 6 months</div>
+  </div>
+
+  <div class="summary-card balance">
+    <div class="summary-header">
+      <span class="summary-label">6-Month Cumulative Savings</span>
+      <div class="summary-icon">🏦</div>
+    </div>
+    <div class="summary-value" style="color: {% if total_savings_all >= 0 %}var(--color-green){% else %}var(--color-red){% endif %};">
+      {% if total_savings_all >= 0 %}+{% endif %}{{ total_savings_all | currency }}
+    </div>
+    <div class="summary-subtext">
+      {% if total_savings_all >= 0 %}
+      Positive net wealth accumulation
+      {% else %}
+      Net cash outflow deficit
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- History Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+  <div class="table-container" style="border: none;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th style="text-align: right;">Total Income</th>
+          <th style="text-align: right;">Total Expenses</th>
+          <th style="text-align: right;">Net Savings</th>
+          <th style="text-align: center;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in history_rows %}
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">
+            {{ row.month_label }}
+          </td>
+          <td style="text-align: right; color: var(--color-green); font-weight: 600;">
+            {{ row.income | currency }}
+          </td>
+          <td style="text-align: right; color: var(--text-secondary); font-weight: 500;">
+            {{ row.expense | currency }}
+          </td>
+          <td style="text-align: right; font-weight: 700; font-size: 1rem;">
+            {% if row.is_positive %}
+            <span class="amount-income">+{{ row.savings | currency }}</span>
+            {% else %}
+            <span class="amount-expense">-{{ (row.savings | abs) | currency }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            {% if row.is_positive %}
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background-color: var(--color-green-bg); color: var(--color-green); padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.3);">
+              <span>●</span> Surplus
+            </span>
+            {% else %}
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background-color: var(--color-red-bg); color: var(--color-red); padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.3);">
+              <span>●</span> Deficit
+            </span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

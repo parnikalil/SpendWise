@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}SpendWise — Login & Register{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <span class="brand-icon">₹</span>
+        <span>SpendWise</span>
+      </div>
+      <p class="page-subtitle">Master your money with clarity and control.</p>
+    </div>
+
+    <!-- Toggle between Login & Register -->
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab-btn {% if active_tab != 'register' %}active{% endif %}" id="tabLoginBtn">
+        Log In
+      </button>
+      <button type="button" class="auth-tab-btn {% if active_tab == 'register' %}active{% endif %}" id="tabRegisterBtn">
+        Create Account
+      </button>
+    </div>
+
+    <!-- Demo Credentials Quick Access Hint -->
+    <div class="demo-account-hint">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong>⚡ Test Demo Account:</strong>
+        <span style="font-size:0.75rem; opacity:0.8;">Auto-seeded</span>
+      </div>
+      <span>Email: <code>test@spendwise.com</code> | Pass: <code>test123</code></span>
+      <button type="button" id="useDemoCredsBtn">Use Demo Credentials</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" action="{{ url_for('login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" method="POST" style="{% if active_tab == 'register' %}display: none;{% endif %}">
+      <div class="form-group">
+        <label class="form-label" for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" name="email" class="form-control" placeholder="name@example.com" value="{{ email or '' }}" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" name="password" class="form-control" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
+        Sign In to SpendWise
+      </button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" action="{{ url_for('register') }}" method="POST" style="{% if active_tab != 'register' %}display: none;{% endif %}">
+      <div class="form-group">
+        <label class="form-label" for="regName">Full Name</label>
+        <input type="text" id="regName" name="name" class="form-control" placeholder="Alex Morgan" value="{{ name or '' }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="regEmail">Email Address</label>
+        <input type="email" id="regEmail" name="email" class="form-control" placeholder="alex@example.com" value="{{ email or '' }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="regPassword">Password (minimum 6 characters)</label>
+        <input type="password" id="regPassword" name="password" minlength="6" class="form-control" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
+        Create My Account
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const tabLoginBtn = document.getElementById('tabLoginBtn');
+  const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const useDemoCredsBtn = document.getElementById('useDemoCredsBtn');
+
+  tabLoginBtn.addEventListener('click', () => {
+    tabLoginBtn.classList.add('active');
+    tabRegisterBtn.classList.remove('active');
+    loginForm.style.display = 'block';
+    registerForm.style.display = 'none';
+    document.getElementById('loginEmail').focus();
+  });
+
+  tabRegisterBtn.addEventListener('click', () => {
+    tabRegisterBtn.classList.add('active');
+    tabLoginBtn.classList.remove('active');
+    registerForm.style.display = 'block';
+    loginForm.style.display = 'none';
+    document.getElementById('regName').focus();
+  });
+
+  if (useDemoCredsBtn) {
+    useDemoCredsBtn.addEventListener('click', () => {
+      tabLoginBtn.click();
+      document.getElementById('loginEmail').value = 'test@spendwise.com';
+      document.getElementById('loginPassword').value = 'test123';
+      loginForm.querySelector('button[type="submit"]').focus();
+    });
+  }
+</script>
+{% endblock %}

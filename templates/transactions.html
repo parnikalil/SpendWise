@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}SpendWise — All Transactions{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Transactions</h1>
+    <p class="page-subtitle">Track, filter, and manage your income and expenses</p>
+  </div>
+  <button class="btn btn-primary" data-open-add-modal>
+    <span>+</span> Add Transaction
+  </button>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <form id="filterForm" method="GET" action="{{ url_for('transactions') }}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; width: 100%;">
+    <!-- Month Dropdown -->
+    <select name="month" class="filter-select" onchange="this.form.submit()">
+      <option value="">All Months</option>
+      {% for m in available_months %}
+      <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>
+        {{ m | month_name }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <!-- Category Dropdown -->
+    <select name="category" class="filter-select" onchange="this.form.submit()">
+      <option value="">All Categories</option>
+      <optgroup label="Expense Categories">
+        {% for cat in expense_categories %}
+        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
+          {{ category_icons.get(cat, '📦') }} {{ cat }}
+        </option>
+        {% endfor %}
+      </optgroup>
+      <optgroup label="Income Categories">
+        {% for cat in income_categories %}
+        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
+          {{ category_icons.get(cat, '📦') }} {{ cat }}
+        </option>
+        {% endfor %}
+      </optgroup>
+    </select>
+
+    <!-- Type Dropdown -->
+    <select name="type" class="filter-select" onchange="this.form.submit()">
+      <option value="">All Types (Income & Expense)</option>
+      <option value="Income" {% if selected_type == 'Income' %}selected{% endif %}>Income Only</option>
+      <option value="Expense" {% if selected_type == 'Expense' %}selected{% endif %}>Expense Only</option>
+    </select>
+
+    {% if selected_month or selected_category or selected_type %}
+    <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm" style="margin-left: auto;">
+      Clear Filters ✕
+    </a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Full Transactions Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+  {% if transactions %}
+  <div class="table-container" style="border: none;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Note</th>
+          <th style="text-align: right;">Amount</th>
+          <th style="text-align: center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr id="tx-row-{{ tx.id }}">
+          <td style="white-space: nowrap; font-size: 0.88rem; color: var(--text-muted);">
+            {{ tx.date | format_date }}
+          </td>
+          <td>
+            <span class="badge-category">
+              <span>{{ category_icons.get(tx.category, '📦') }}</span>
+              <span>{{ tx.category }}</span>
+            </span>
+          </td>
+          <td style="color: var(--text-secondary); max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ tx.note or '—' }}
+          </td>
+          <td style="text-align: right;">
+            {% if tx.type == 'Income' %}
+            <span class="amount-income">+{{ tx.amount | currency }}</span>
+            {% else %}
+            <span class="amount-expense">-{{ tx.amount | currency }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            <div class="action-buttons" style="justify-content: center;">
+              <button class="btn-icon" data-edit-tx="{{ tx.id }}" title="Edit transaction" aria-label="Edit">
+                ✏️
+              </button>
+              <button class="btn-icon delete" data-delete-tx="{{ tx.id }}" title="Delete transaction" aria-label="Delete">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 4rem 1.5rem; color: var(--text-muted);">
+    <p style="font-size: 2.2rem; margin-bottom: 0.75rem;">🔍</p>
+    <h3 style="color: var(--text-primary); font-size: 1.15rem; margin-bottom: 0.25rem;">No transactions found</h3>
+    <p style="font-size: 0.9rem;">Try adjusting or clearing your filters, or record a new transaction.</p>
+    <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center;">
+      {% if selected_month or selected_category or selected_type %}
+      <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+      {% endif %}
+      <button class="btn btn-primary btn-sm" data-open-add-modal>+ Add Transaction</button>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
