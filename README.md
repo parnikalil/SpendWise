@@ -1,33 +1,33 @@
-# 💸 SpendWise — B.Tech. Student Edition (Parnika Lilani)
+# 💸 SpendWise - B.Tech. Student Edition (Parnika Lilani)
 
 SpendWise is a sleek, dark-themed personal finance tracker specifically adapted for **Parnika Lilani**, a B.Tech. engineering student. Built with **Flask**, **SQLite**, and **vanilla HTML/CSS/JavaScript** (no React, no npm, no frontend frameworks).
 
 ---
 
-## 🎓 Tailored for B.Tech. College Life
+##  Tailored for B.Tech. College Life
 
 SpendWise includes spending and income streams designed for an engineering student:
 
-### 📉 Student Expense Categories:
-1. **🏠 Hostel Fees**: Semester accommodation, room installment, mess fees, laundry deposits.
-2. **🍔 Food**: College mess card recharge, campus canteen cutting chai & samosas, midnight Maggi during exams.
-3. **⛽ Fuel**: Two-wheeler scooty petrol for college, coaching, and lab commute.
-4. **🚆 Travel**: Metro card recharge, auto rides, holiday trains & buses back home for semester breaks.
-5. **📚 Stationery**: Engineering graphics drawing sheets, Casio fx-991CW scientific calculator, lab journals, assignment Xerox and printouts.
-6. **📱 Phone Recharge**: 5G student data plans (Airtel / Jio 3-month unlimited pack), hostel room shared WiFi contribution.
-7. **💻 Tech & Books**: Udemy/Coursera coding courses, core engineering textbooks (DSA, OS, DBMS), cloud credits for group projects.
-8. **🎬 Entertainment**: College tech fest & hackathon passes, batch movie nights, outings with friends.
-9. **📦 Others**: Semester exam admit card fees, campus pharmacy, personal care.
+### Student Expense Categories:
+1. **Hostel Fees**: Semester accommodation, room installment, mess fees, laundry deposits.
+2. **Food**: College mess card recharge, campus canteen cutting chai & samosas, midnight Maggi during exams.
+3. **Fuel**: Two-wheeler scooty petrol for college, coaching, and lab commute.
+4. **Travel**: Metro card recharge, auto rides, holiday trains & buses back home for semester breaks.
+5. **Stationery**: Engineering graphics drawing sheets, Casio fx-991CW scientific calculator, lab journals, assignment Xerox and printouts.
+6. **Phone Recharge**: 5G student data plans (Airtel / Jio 3-month unlimited pack), hostel room shared WiFi contribution.
+7. **Tech & Books**: Udemy/Coursera coding courses, core engineering textbooks (DSA, OS, DBMS), cloud credits for group projects.
+8. **Entertainment**: College tech fest & hackathon passes, batch movie nights, outings with friends.
+9. **Others**: Semester exam admit card fees, campus pharmacy, personal care.
 
-### 📈 Student Income Streams:
-- **💵 Allowance**: Monthly pocket money and college support from parents.
-- **💼 Internship Stipend**: Remote / summer frontend software development internship earnings.
-- **💻 Freelance**: Python automation scripts, web design, and coding tasks for seniors/clients.
-- **🎓 Scholarship**: University merit-cum-means scholarship awards.
+### Student Income Streams:
+- **Allowance**: Monthly pocket money and college support from parents.
+- **Internship Stipend**: Remote / summer frontend software development internship earnings.
+- **Freelance**: Python automation scripts, web design, and coding tasks for seniors/clients.
+- **Scholarship**: University merit-cum-means scholarship awards.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Run the Application
 ```bash
@@ -51,7 +51,7 @@ Open your browser at:
 
 ---
 
-## 🎨 Visual Design System
+## Visual Design System
 
 - **Dark Mode Background:** `#0F0F0F`
 - **Cards & Surfaces:** `#1A1A1A` with subtle border `#2A2A2A`
@@ -67,7 +67,7 @@ Open your browser at:
 
 ---
 
-## 📁 Project Architecture
+## Project Architecture
 ```
 spendwise/
 ├── app.py                     # Flask server with student categories & JSON APIs
