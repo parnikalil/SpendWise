@@ -1,17 +1,38 @@
 import os
+import shutil
 import sqlite3
-from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'spendwise.db')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Vercel serverless functions have a read-only filesystem, except for /tmp
+IS_VERCEL = bool(os.environ.get('VERCEL'))
+DB_DIR = '/tmp' if IS_VERCEL else BASE_DIR
+DB_PATH = os.path.join(DB_DIR, 'spendwise.db')
+PRESEEDED_DB = os.path.join(BASE_DIR, 'spendwise.db')
+
+def ensure_database_ready():
+    """Ensure database exists and is writable in both local and serverless environments."""
+    if IS_VERCEL and not os.path.exists(DB_PATH):
+        if os.path.exists(PRESEEDED_DB):
+            shutil.copy2(PRESEEDED_DB, DB_PATH)
+        else:
+            init_db()
+            from seed import seed_data
+            seed_data()
 
 def get_db_connection():
+    ensure_database_ready()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
 def init_db():
-    conn = get_db_connection()
+    if IS_VERCEL and not os.path.exists(DB_DIR):
+        os.makedirs(DB_DIR, exist_ok=True)
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     cursor.execute("""
