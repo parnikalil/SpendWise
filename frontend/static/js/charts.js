@@ -20,22 +20,39 @@ const ORANGE_SHADES = [
 ];
 
 window.renderDashboardChartsFromStore = function(transactions, currentMonthKey) {
-  const pieCanvas = document.getElementById('expensePieChart');
-  const barCanvas = document.getElementById('incomeExpenseBarChart');
-  if (!pieCanvas || !barCanvas) return;
+  if (typeof Chart === 'undefined') {
+    setTimeout(function() {
+      window.renderDashboardChartsFromStore(transactions, currentMonthKey);
+    }, 60);
+    return;
+  }
 
-  renderExpenseDoughnut(pieCanvas, transactions, currentMonthKey);
-  renderIncomeExpenseBars(barCanvas, transactions);
+  const pieContainer = document.getElementById('pieChartContainer');
+  const barContainer = document.getElementById('barChartContainer');
+  if (!pieContainer && !barContainer) return;
+
+  if (!transactions && typeof SpendWiseStore !== 'undefined') {
+    transactions = SpendWiseStore.getTransactions();
+  }
+  transactions = transactions || [];
+
+  if (!currentMonthKey) {
+    const now = new Date();
+    currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  renderExpenseDoughnut(transactions, currentMonthKey);
+  renderIncomeExpenseBars(transactions);
 };
 
-function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
+function renderExpenseDoughnut(transactions, currentMonthKey) {
   const container = document.getElementById('pieChartContainer');
   if (!container) return;
 
   const categoryTotals = {};
   let totalExpenseThisMonth = 0;
 
-  transactions.forEach(t => {
+  transactions.forEach(function(t) {
     if (t.type === 'Expense' && String(t.date).startsWith(currentMonthKey)) {
       const amt = parseFloat(t.amount || 0);
       categoryTotals[t.category] = (categoryTotals[t.category] || 0) + amt;
@@ -43,8 +60,12 @@ function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
     }
   });
 
-  const categories = Object.keys(categoryTotals).sort((a, b) => categoryTotals[b] - categoryTotals[a]);
-  const amounts = categories.map(c => categoryTotals[c]);
+  const categories = Object.keys(categoryTotals).sort(function(a, b) {
+    return categoryTotals[b] - categoryTotals[a];
+  });
+  const amounts = categories.map(function(c) {
+    return categoryTotals[c];
+  });
 
   if (amounts.length === 0 || totalExpenseThisMonth === 0) {
     if (pieChartInstance) {
@@ -53,6 +74,7 @@ function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
     }
     container.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#9CA3AF; gap:0.5rem;">
+        <span style="font-size:2rem;">🍩</span>
         <p style="font-size:0.9rem;">No expenses recorded for this month yet.</p>
       </div>
     `;
@@ -111,7 +133,7 @@ function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
           callbacks: {
             label: function(context) {
               const val = context.parsed || 0;
-              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
               const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
               return ` ₹${val.toLocaleString('en-IN')} (${percentage}%)`;
             }
@@ -122,7 +144,16 @@ function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
   });
 }
 
-function renderIncomeExpenseBars(canvas, transactions) {
+function renderIncomeExpenseBars(transactions) {
+  const container = document.getElementById('barChartContainer');
+  if (!container) return;
+
+  let currentCanvas = document.getElementById('incomeExpenseBarChart');
+  if (!currentCanvas) {
+    container.innerHTML = '<canvas id="incomeExpenseBarChart"></canvas>';
+    currentCanvas = document.getElementById('incomeExpenseBarChart');
+  }
+
   const now = new Date();
   const curY = now.getFullYear();
   const curM = now.getMonth() + 1;
@@ -147,11 +178,11 @@ function renderIncomeExpenseBars(canvas, transactions) {
   const expenseData = [];
   const labels = [];
 
-  months.forEach(m => {
+  months.forEach(function(m) {
     labels.push(m.label);
     let inc = 0;
     let exp = 0;
-    transactions.forEach(t => {
+    transactions.forEach(function(t) {
       if (String(t.date).startsWith(m.key)) {
         if (t.type === 'Income') inc += parseFloat(t.amount || 0);
         if (t.type === 'Expense') exp += parseFloat(t.amount || 0);
@@ -166,7 +197,7 @@ function renderIncomeExpenseBars(canvas, transactions) {
     barChartInstance = null;
   }
 
-  const ctx = canvas.getContext('2d');
+  const ctx = currentCanvas.getContext('2d');
   barChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -245,4 +276,18 @@ function renderIncomeExpenseBars(canvas, transactions) {
       }
     }
   });
+}
+
+function autoInitCharts() {
+  if (document.getElementById('expensePieChart') || document.getElementById('incomeExpenseBarChart')) {
+    const txs = (typeof SpendWiseStore !== 'undefined') ? SpendWiseStore.getTransactions() : (window.__INITIAL_DATA__ ? window.__INITIAL_DATA__.transactions : []);
+    const curM = (typeof getCurrentMonthKey === 'function') ? getCurrentMonthKey() : new Date().toISOString().slice(0, 7);
+    window.renderDashboardChartsFromStore(txs, curM);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', autoInitCharts);
+} else {
+  autoInitCharts();
 }

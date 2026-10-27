@@ -9,56 +9,51 @@
     <p class="page-subtitle">B.Tech Student Financial Overview for {{ month_label }} • {{ current_user.name }}</p>
   </div>
   <button class="btn btn-primary" data-open-add-modal>
-    + Add Transaction
+    <span>+</span> Add Expense / Income
   </button>
 </div>
 
-<!-- Restructured Financial Metric Layout (Asymmetric Ledger Balance + Supporting In/Out Streams) -->
-<div class="dashboard-hero-grid">
-  <!-- Primary Metric: Net Monthly Balance & Status -->
-  <div class="summary-card hero-balance-card">
+<!-- 3 Summary Cards -->
+<div class="summary-grid">
+  <!-- Total Income (this month) -->
+  <div class="summary-card income">
+    <div class="summary-header">
+      <span class="summary-label">Total Income (This Month)</span>
+      <div class="summary-icon">💰</div>
+    </div>
+    <div class="summary-value" id="summaryIncome" style="color: var(--color-green);">
+      {{ total_income | currency }}
+    </div>
+    <div class="summary-subtext" id="summaryIncomeSubtext">Earned in {{ month_label }}</div>
+  </div>
+
+  <!-- Total Expense (this month) -->
+  <div class="summary-card expense">
+    <div class="summary-header">
+      <span class="summary-label">Total Expense (This Month)</span>
+      <div class="summary-icon">💳</div>
+    </div>
+    <div class="summary-value" id="summaryExpense" style="color: var(--accent-orange);">
+      {{ total_expense | currency }}
+    </div>
+    <div class="summary-subtext" id="summaryExpenseSubtext">Spent in {{ month_label }}</div>
+  </div>
+
+  <!-- Current Balance -->
+  <div class="summary-card balance">
     <div class="summary-header">
       <span class="summary-label">Net Balance (This Month)</span>
-      <span class="badge-status-pill {% if current_balance >= 0 %}surplus{% else %}deficit{% endif %}">
-        {% if current_balance >= 0 %}Monthly Surplus{% else %}Net Deficit{% endif %}
-      </span>
+      <div class="summary-icon">⚖️</div>
     </div>
-    <div class="summary-value" id="summaryBalance" style="color: {% if current_balance >= 0 %}#38BDF8{% else %}var(--color-red){% endif %}; font-size: 2.25rem;">
+    <div class="summary-value" id="summaryBalance" style="color: {% if current_balance >= 0 %}#38BDF8{% else %}var(--color-red){% endif %};">
       {{ current_balance | currency }}
     </div>
     <div class="summary-subtext" id="summaryBalanceSubtext">
       {% if current_balance >= 0 %}
-      Savings rate: {{ ((current_balance / total_income) * 100)|round(1) if total_income > 0 else 0 }}% of monthly inflow retained
+      Savings rate: {{ ((current_balance / total_income) * 100)|round(1) if total_income > 0 else 0 }}%
       {% else %}
-      Deficit: Outflow exceeded income this month
+      Deficit: Spent more than income
       {% endif %}
-    </div>
-  </div>
-
-  <!-- Paired Inflow / Outflow Column -->
-  <div class="hero-stream-col">
-    <!-- Total Income -->
-    <div class="summary-card income stream-card">
-      <div class="summary-header">
-        <span class="summary-label">Total Income</span>
-        <span style="font-size: 0.78rem; color: var(--color-green); font-weight: 600;">Inflow</span>
-      </div>
-      <div class="summary-value" id="summaryIncome" style="color: var(--color-green); font-size: 1.5rem;">
-        {{ total_income | currency }}
-      </div>
-      <div class="summary-subtext" id="summaryIncomeSubtext">Earned in {{ month_label }}</div>
-    </div>
-
-    <!-- Total Expense -->
-    <div class="summary-card expense stream-card">
-      <div class="summary-header">
-        <span class="summary-label">Total Expense</span>
-        <span style="font-size: 0.78rem; color: var(--accent-orange); font-weight: 600;">Outflow</span>
-      </div>
-      <div class="summary-value" id="summaryExpense" style="color: var(--accent-orange); font-size: 1.5rem;">
-        {{ total_expense | currency }}
-      </div>
-      <div class="summary-subtext" id="summaryExpenseSubtext">Spent in {{ month_label }}</div>
     </div>
   </div>
 </div>
@@ -68,7 +63,9 @@
   <!-- Pie / Doughnut Chart: Expense Breakdown This Month -->
   <div class="card chart-card">
     <div class="card-header">
-      <h2 class="card-title">Expense Breakdown</h2>
+      <h2 class="card-title">
+        <span>🍩</span> Expense Breakdown
+      </h2>
       <span style="font-size: 0.8rem; color: var(--text-muted);" id="pieChartMonthLabel">{{ month_label }}</span>
     </div>
     <div class="chart-wrapper" id="pieChartContainer">
@@ -79,7 +76,9 @@
   <!-- Bar Chart: Income vs Expense for Last 6 Months Side-by-Side -->
   <div class="card chart-card">
     <div class="card-header">
-      <h2 class="card-title">Income vs Expense</h2>
+      <h2 class="card-title">
+        <span>📊</span> Income vs Expense
+      </h2>
       <span style="font-size: 0.8rem; color: var(--text-muted);">Last 6 Months</span>
     </div>
     <div class="chart-wrapper" id="barChartContainer">
@@ -91,7 +90,9 @@
 <!-- Recent Transactions Section -->
 <div class="card">
   <div class="card-header">
-    <h2 class="card-title">Recent Transactions</h2>
+    <h2 class="card-title">
+      <span>⏱️</span> Recent Transactions
+    </h2>
     <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm">
       View All Transactions &rarr;
     </a>
@@ -146,10 +147,16 @@
     </table>
   </div>
 
-  <div id="recentEmptyState" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); {% if recent_transactions %}display: none;{% endif %}">
-    <p style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-secondary);">No transactions recorded for this period.</p>
-    <p style="font-size: 0.85rem; margin-bottom: 1.25rem;">Add your first semester expense or income entry to see live metrics.</p>
-    <button class="btn btn-primary btn-sm" data-open-add-modal>+ Add Transaction</button>
+  <div id="recentEmptyState" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); {% if recent_transactions %}display: none;{% endif %}">
+    <p style="font-size: 1.5rem; margin-bottom: 0.5rem;">💳</p>
+    <p>No transactions found for this account.</p>
+    <button class="btn btn-primary btn-sm" data-open-add-modal style="margin-top: 1rem;">
+      + Add First Transaction
+    </button>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}

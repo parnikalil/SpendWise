@@ -17,13 +17,11 @@
   <!-- Core Dark Theme CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-  <!-- Chart.js CDN with Local Fallback -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <!-- Bundled Chart.js Engine with CDN Fallback -->
+  <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
   <script>
     if (typeof Chart === 'undefined') {
-      const fallbackScript = document.createElement('script');
-      fallbackScript.src = "{{ url_for('static', filename='js/chart.min.js') }}";
-      document.head.appendChild(fallbackScript);
+      document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"><\/script>');
     }
   </script>
 </head>
@@ -167,6 +165,7 @@
   <script>
     window.__INITIAL_DATA__ = {{ initial_data_json | safe }};
   </script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   {% block scripts %}{% endblock %}
 

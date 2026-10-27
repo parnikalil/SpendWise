@@ -267,13 +267,9 @@ function renderDashboard() {
   if (balSub) {
     if (netBalance >= 0) {
       const pct = totalIncome > 0 ? ((netBalance / totalIncome) * 100).toFixed(1) : 0;
-      balSub.textContent = `Savings rate: ${pct}% of monthly inflow retained`;
-    const balPill = document.getElementById('summaryBalancePill');
-    if (balPill) { balPill.className = 'badge-status-pill surplus'; balPill.textContent = 'Monthly Surplus'; }
+      balSub.textContent = `Savings rate: ${pct}%`;
     } else {
-      balSub.textContent = 'Deficit: Outflow exceeded income this month';
-    const balPill = document.getElementById('summaryBalancePill');
-    if (balPill) { balPill.className = 'badge-status-pill deficit'; balPill.textContent = 'Net Deficit'; }
+      balSub.textContent = 'Deficit: Spent more than income';
     }
   }
 
