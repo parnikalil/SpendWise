@@ -1,9 +1,16 @@
 import unittest
 import json
 import datetime
-from app import app
-from database import init_db
-from seed import seed_data
+import os
+import sys
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from backend.app import app
+from backend.database import init_db
+from backend.seed import seed_data
 
 class SpendWiseStudentTestCase(unittest.TestCase):
     def setUp(self):

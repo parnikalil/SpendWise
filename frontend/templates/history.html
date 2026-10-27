@@ -17,7 +17,7 @@
       <span class="summary-label">6-Month Total Income</span>
       <div class="summary-icon">📈</div>
     </div>
-    <div class="summary-value" style="color: var(--color-green);">
+    <div class="summary-value" id="histIncomeAll" style="color: var(--color-green);">
       {{ total_income_all | currency }}
     </div>
     <div class="summary-subtext">Across past 6 months</div>
@@ -28,7 +28,7 @@
       <span class="summary-label">6-Month Total Expenses</span>
       <div class="summary-icon">📉</div>
     </div>
-    <div class="summary-value" style="color: var(--accent-orange);">
+    <div class="summary-value" id="histExpenseAll" style="color: var(--accent-orange);">
       {{ total_expense_all | currency }}
     </div>
     <div class="summary-subtext">Across past 6 months</div>
@@ -39,10 +39,10 @@
       <span class="summary-label">6-Month Cumulative Savings</span>
       <div class="summary-icon">🏦</div>
     </div>
-    <div class="summary-value" style="color: {% if total_savings_all >= 0 %}var(--color-green){% else %}var(--color-red){% endif %};">
+    <div class="summary-value" id="histSavingsAll" style="color: {% if total_savings_all >= 0 %}var(--color-green){% else %}var(--color-red){% endif %};">
       {% if total_savings_all >= 0 %}+{% endif %}{{ total_savings_all | currency }}
     </div>
-    <div class="summary-subtext">
+    <div class="summary-subtext" id="histSavingsSubtext">
       {% if total_savings_all >= 0 %}
       Positive net wealth accumulation
       {% else %}
@@ -65,7 +65,7 @@
           <th style="text-align: center;">Status</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="historyTableBody">
         {% for row in history_rows %}
         <tr>
           <td style="font-weight: 600; color: var(--text-primary);">

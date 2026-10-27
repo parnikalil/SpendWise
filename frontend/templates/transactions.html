@@ -9,15 +9,15 @@
     <p class="page-subtitle">Track, filter, and manage your income and expenses</p>
   </div>
   <button class="btn btn-primary" data-open-add-modal>
-    <span>+</span> Add Transaction
+    <span>+</span> Add Expense / Income
   </button>
 </div>
 
 <!-- Filter Bar -->
 <div class="filter-bar">
-  <form id="filterForm" method="GET" action="{{ url_for('transactions') }}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; width: 100%;">
+  <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; width: 100%;">
     <!-- Month Dropdown -->
-    <select name="month" class="filter-select" onchange="this.form.submit()">
+    <select id="filterMonth" class="filter-select">
       <option value="">All Months</option>
       {% for m in available_months %}
       <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>
@@ -27,7 +27,7 @@
     </select>
 
     <!-- Category Dropdown -->
-    <select name="category" class="filter-select" onchange="this.form.submit()">
+    <select id="filterCategory" class="filter-select">
       <option value="">All Categories</option>
       <optgroup label="Expense Categories">
         {% for cat in expense_categories %}
@@ -46,24 +46,21 @@
     </select>
 
     <!-- Type Dropdown -->
-    <select name="type" class="filter-select" onchange="this.form.submit()">
+    <select id="filterType" class="filter-select">
       <option value="">All Types (Income & Expense)</option>
       <option value="Income" {% if selected_type == 'Income' %}selected{% endif %}>Income Only</option>
       <option value="Expense" {% if selected_type == 'Expense' %}selected{% endif %}>Expense Only</option>
     </select>
 
-    {% if selected_month or selected_category or selected_type %}
-    <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm" style="margin-left: auto;">
+    <button type="button" id="clearFiltersBtn" class="btn btn-secondary btn-sm" style="margin-left: auto;">
       Clear Filters ✕
-    </a>
-    {% endif %}
-  </form>
+    </button>
+  </div>
 </div>
 
 <!-- Full Transactions Table -->
 <div class="card" style="padding: 0; overflow: hidden;">
-  {% if transactions %}
-  <div class="table-container" style="border: none;">
+  <div class="table-container" id="transactionsTableWrapper" style="border: none; {% if not transactions %}display: none;{% endif %}">
     <table class="table">
       <thead>
         <tr>
@@ -74,7 +71,7 @@
           <th style="text-align: center;">Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="transactionsTableBody">
         {% for tx in transactions %}
         <tr id="tx-row-{{ tx.id }}">
           <td style="white-space: nowrap; font-size: 0.88rem; color: var(--text-muted);">
@@ -111,18 +108,14 @@
       </tbody>
     </table>
   </div>
-  {% else %}
-  <div style="text-align: center; padding: 4rem 1.5rem; color: var(--text-muted);">
+
+  <div id="transactionsEmptyState" style="text-align: center; padding: 4rem 1.5rem; color: var(--text-muted); {% if transactions %}display: none;{% endif %}">
     <p style="font-size: 2.2rem; margin-bottom: 0.75rem;">🔍</p>
     <h3 style="color: var(--text-primary); font-size: 1.15rem; margin-bottom: 0.25rem;">No transactions found</h3>
     <p style="font-size: 0.9rem;">Try adjusting or clearing your filters, or record a new transaction.</p>
     <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center;">
-      {% if selected_month or selected_category or selected_type %}
-      <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
-      {% endif %}
       <button class="btn btn-primary btn-sm" data-open-add-modal>+ Add Transaction</button>
     </div>
   </div>
-  {% endif %}
 </div>
 {% endblock %}

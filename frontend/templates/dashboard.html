@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}SpendWise — Financial Dashboard{% endblock %}
+{% block title %}SpendWise — Campus & Semester Dashboard{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -21,10 +21,10 @@
       <span class="summary-label">Total Income (This Month)</span>
       <div class="summary-icon">💰</div>
     </div>
-    <div class="summary-value" style="color: var(--color-green);">
+    <div class="summary-value" id="summaryIncome" style="color: var(--color-green);">
       {{ total_income | currency }}
     </div>
-    <div class="summary-subtext">Earned in {{ month_label }}</div>
+    <div class="summary-subtext" id="summaryIncomeSubtext">Earned in {{ month_label }}</div>
   </div>
 
   <!-- Total Expense (this month) -->
@@ -33,10 +33,10 @@
       <span class="summary-label">Total Expense (This Month)</span>
       <div class="summary-icon">💳</div>
     </div>
-    <div class="summary-value" style="color: var(--accent-orange);">
+    <div class="summary-value" id="summaryExpense" style="color: var(--accent-orange);">
       {{ total_expense | currency }}
     </div>
-    <div class="summary-subtext">Spent in {{ month_label }}</div>
+    <div class="summary-subtext" id="summaryExpenseSubtext">Spent in {{ month_label }}</div>
   </div>
 
   <!-- Current Balance -->
@@ -45,10 +45,10 @@
       <span class="summary-label">Net Balance (This Month)</span>
       <div class="summary-icon">⚖️</div>
     </div>
-    <div class="summary-value" style="color: {% if current_balance >= 0 %}#38BDF8{% else %}var(--color-red){% endif %};">
+    <div class="summary-value" id="summaryBalance" style="color: {% if current_balance >= 0 %}#38BDF8{% else %}var(--color-red){% endif %};">
       {{ current_balance | currency }}
     </div>
-    <div class="summary-subtext">
+    <div class="summary-subtext" id="summaryBalanceSubtext">
       {% if current_balance >= 0 %}
       Savings rate: {{ ((current_balance / total_income) * 100)|round(1) if total_income > 0 else 0 }}%
       {% else %}
@@ -66,9 +66,9 @@
       <h2 class="card-title">
         <span>🍩</span> Expense Breakdown
       </h2>
-      <span style="font-size: 0.8rem; color: var(--text-muted);">{{ month_label }}</span>
+      <span style="font-size: 0.8rem; color: var(--text-muted);" id="pieChartMonthLabel">{{ month_label }}</span>
     </div>
-    <div class="chart-wrapper">
+    <div class="chart-wrapper" id="pieChartContainer">
       <canvas id="expensePieChart"></canvas>
     </div>
   </div>
@@ -81,7 +81,7 @@
       </h2>
       <span style="font-size: 0.8rem; color: var(--text-muted);">Last 6 Months</span>
     </div>
-    <div class="chart-wrapper">
+    <div class="chart-wrapper" id="barChartContainer">
       <canvas id="incomeExpenseBarChart"></canvas>
     </div>
   </div>
@@ -98,8 +98,7 @@
     </a>
   </div>
 
-  {% if recent_transactions %}
-  <div class="table-container">
+  <div class="table-container" id="recentTableWrapper" style="{% if not recent_transactions %}display: none;{% endif %}">
     <table class="table">
       <thead>
         <tr>
@@ -110,7 +109,7 @@
           <th style="text-align: center;">Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="recentTxTableBody">
         {% for tx in recent_transactions %}
         <tr id="tx-row-{{ tx.id }}">
           <td style="white-space: nowrap; font-size: 0.88rem; color: var(--text-muted);">
@@ -147,15 +146,14 @@
       </tbody>
     </table>
   </div>
-  {% else %}
-  <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+
+  <div id="recentEmptyState" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); {% if recent_transactions %}display: none;{% endif %}">
     <p style="font-size: 1.5rem; margin-bottom: 0.5rem;">💳</p>
     <p>No transactions found for this account.</p>
     <button class="btn btn-primary btn-sm" data-open-add-modal style="margin-top: 1rem;">
       + Add First Transaction
     </button>
   </div>
-  {% endif %}
 </div>
 {% endblock %}
 

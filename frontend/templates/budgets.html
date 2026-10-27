@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}SpendWise — Category Budgets{% endblock %}
+{% block title %}SpendWise — Semester Category Budgets{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -10,15 +10,15 @@
   </div>
 
   <!-- Month selector -->
-  <form method="GET" action="{{ url_for('budgets') }}" style="display: flex; align-items: center; gap: 0.5rem;">
-    <select name="month" class="filter-select" onchange="this.form.submit()">
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <select id="budgetMonthSelector" class="filter-select">
       {% for m in available_months %}
       <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>
         {{ m | month_name }}
       </option>
       {% endfor %}
     </select>
-  </form>
+  </div>
 </div>
 
 <!-- Overall Budget Summary Banner -->
@@ -28,8 +28,8 @@
       <span class="summary-label">Total Allocated Budget</span>
       <div class="summary-icon">🎯</div>
     </div>
-    <div class="summary-value">{{ total_budget_limit | currency }}</div>
-    <div class="summary-subtext">For {{ month_display }}</div>
+    <div class="summary-value" id="totalBudgetLimitDisplay">{{ total_budget_limit | currency }}</div>
+    <div class="summary-subtext" id="budgetMonthDisplay">For {{ month_display }}</div>
   </div>
 
   <div class="summary-card">
@@ -37,7 +37,7 @@
       <span class="summary-label">Total Spent So Far</span>
       <div class="summary-icon">💸</div>
     </div>
-    <div class="summary-value" style="color: var(--accent-orange);">
+    <div class="summary-value" id="totalBudgetSpentDisplay" style="color: var(--accent-orange);">
       {{ total_budget_spent | currency }}
     </div>
     <div class="summary-subtext">Across all categories</div>
@@ -49,10 +49,10 @@
       <div class="summary-icon">🛡️</div>
     </div>
     {% set overall_pct = ((total_budget_spent / total_budget_limit) * 100)|round(1) if total_budget_limit > 0 else 0 %}
-    <div class="summary-value" style="color: {% if overall_pct > 85 %}var(--color-red){% else %}var(--accent-orange){% endif %};">
+    <div class="summary-value" id="totalBudgetPctDisplay" style="color: {% if overall_pct > 85 %}var(--color-red){% else %}var(--accent-orange){% endif %};">
       {{ overall_pct }}%
     </div>
-    <div class="summary-subtext">
+    <div class="summary-subtext" id="totalBudgetStatusText">
       {% if overall_pct > 85 %}
       ⚠️ Warning: High budget utilization!
       {% else %}
@@ -63,16 +63,16 @@
 </div>
 
 <!-- Category Budget Cards Grid -->
-<div class="budget-grid">
+<div class="budget-grid" id="budgetCardsGrid">
   {% for item in categories %}
-  <div class="budget-card" id="card-{{ item.category }}">
+  <div class="budget-card" id="card-{{ item.category }}" data-category="{{ item.category }}">
     <div>
       <div class="budget-card-header">
         <div class="budget-cat-info">
           <div class="budget-cat-icon">{{ item.icon }}</div>
           <div>
             <h3 class="budget-cat-name">{{ item.category }}</h3>
-            <span style="font-size: 0.78rem; color: var(--text-muted);">
+            <span class="budget-limit-label" style="font-size: 0.78rem; color: var(--text-muted);">
               {% if item.limit > 0 %}
                 Limit: {{ item.limit | currency }}
               {% else %}
@@ -91,13 +91,13 @@
       <div class="budget-metrics">
         <div class="budget-metric-item">
           <span class="budget-metric-label">Spent</span>
-          <span class="budget-metric-value" style="color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--text-primary){% endif %};">
+          <span class="budget-metric-value budget-spent-val" style="color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--text-primary){% endif %};">
             {{ item.spent | currency }}
           </span>
         </div>
         <div class="budget-metric-item" style="text-align: right;">
           <span class="budget-metric-label">Remaining</span>
-          <span class="budget-metric-value" style="color: {% if item.remaining >= 0 %}var(--color-green){% else %}var(--color-red){% endif %};">
+          <span class="budget-metric-value budget-remaining-val" style="color: {% if item.remaining >= 0 %}var(--color-green){% else %}var(--color-red){% endif %};">
             {% if item.limit > 0 %}
               {{ item.remaining | currency }}
             {% else %}
@@ -116,14 +116,14 @@
 
       <!-- Status Row -->
       <div class="budget-status-row">
-        <span style="color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--text-muted){% endif %};">
+        <span class="budget-status-label" style="color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--text-muted){% endif %};">
           {% if item.is_exceeded_85 %}
             🚨 Over 85% threshold
           {% else %}
             Safe spending
           {% endif %}
         </span>
-        <span style="font-weight: 700; color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--accent-orange){% endif %};">
+        <span class="budget-pct-label" style="font-weight: 700; color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--accent-orange){% endif %};">
           {{ item.percentage }}%
         </span>
       </div>
