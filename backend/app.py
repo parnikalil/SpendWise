@@ -843,10 +843,10 @@ if __name__ == '__main__':
 
     port = int(os.environ.get('PORT', 5000))
     print("\n" + "=" * 65)
-    print("  🚀 SpendWise — B.Tech. Student Edition (Parnika Lilani)")
-    print(f"  🌐 Application URL: http://127.0.0.1:{port}")
-    print("  👤 Student Account: parnika@spendwise.com")
-    print("  🔑 Password:        test123")
+    print("  SpendWise: B.Tech. Student Edition (Parnika Lilani)")
+    print(f"  Application URL: http://127.0.0.1:{port}")
+    print("  Student Account: parnika@spendwise.com")
+    print("  Password:        test123")
     print("=" * 65 + "\n")
 
     app.run(host='127.0.0.1', port=port, debug=True)

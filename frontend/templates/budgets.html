@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}SpendWise — Semester Category Budgets{% endblock %}
+{% block title %}SpendWise: Semester Category Budgets{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
     <h1 class="page-title">Semester Category Budgets</h1>
-    <p class="page-subtitle">Set monthly student spending limits (Hostel, Food, Fuel, Travel, Stationery, Phone Recharge) and track alerts</p>
+    <p class="page-subtitle">Monthly spending thresholds for college essentials and semester allowances.</p>
   </div>
 
   <!-- Month selector -->
@@ -26,7 +26,6 @@
   <div class="summary-card">
     <div class="summary-header">
       <span class="summary-label">Total Allocated Budget</span>
-      <div class="summary-icon">🎯</div>
     </div>
     <div class="summary-value" id="totalBudgetLimitDisplay">{{ total_budget_limit | currency }}</div>
     <div class="summary-subtext" id="budgetMonthDisplay">For {{ month_display }}</div>
@@ -35,18 +34,16 @@
   <div class="summary-card">
     <div class="summary-header">
       <span class="summary-label">Total Spent So Far</span>
-      <div class="summary-icon">💸</div>
     </div>
     <div class="summary-value" id="totalBudgetSpentDisplay" style="color: var(--accent-orange);">
       {{ total_budget_spent | currency }}
     </div>
-    <div class="summary-subtext">Across all categories</div>
+    <div class="summary-subtext">Across all active categories</div>
   </div>
 
   <div class="summary-card">
     <div class="summary-header">
-      <span class="summary-label">Overall Budget Status</span>
-      <div class="summary-icon">🛡️</div>
+      <span class="summary-label">Budget Consumption</span>
     </div>
     {% set overall_pct = ((total_budget_spent / total_budget_limit) * 100)|round(1) if total_budget_limit > 0 else 0 %}
     <div class="summary-value" id="totalBudgetPctDisplay" style="color: {% if overall_pct > 85 %}var(--color-red){% else %}var(--accent-orange){% endif %};">
@@ -54,9 +51,9 @@
     </div>
     <div class="summary-subtext" id="totalBudgetStatusText">
       {% if overall_pct > 85 %}
-      ⚠️ Warning: High budget utilization!
+      Warning: High budget utilization
       {% else %}
-      ✅ Within healthy spending thresholds
+      Spending remains within limits
       {% endif %}
     </div>
   </div>
@@ -101,7 +98,7 @@
             {% if item.limit > 0 %}
               {{ item.remaining | currency }}
             {% else %}
-              —
+              -
             {% endif %}
           </span>
         </div>
@@ -118,9 +115,9 @@
       <div class="budget-status-row">
         <span class="budget-status-label" style="color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--text-muted){% endif %};">
           {% if item.is_exceeded_85 %}
-            🚨 Over 85% threshold
+            Over 85% limit
           {% else %}
-            Safe spending
+            Under limit
           {% endif %}
         </span>
         <span class="budget-pct-label" style="font-weight: 700; color: {% if item.is_exceeded_85 %}var(--color-red){% else %}var(--accent-orange){% endif %};">

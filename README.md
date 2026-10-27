@@ -1,29 +1,29 @@
-# 💸 SpendWise - B.Tech. Student Edition (Parnika Lilani)
+# SpendWise: B.Tech. Student Edition (Parnika Lilani)
 
-SpendWise is a sleek, dark-themed personal finance tracker specifically adapted for **Parnika Lilani**, a B.Tech. engineering student. Built with **Flask**, **SQLite**, and **vanilla HTML/CSS/JavaScript** (no React, no npm, no frontend frameworks).
+SpendWise is a dark-themed personal finance tracker adapted for Parnika Lilani, an engineering student. It is built with Flask, SQLite, and standard HTML, CSS, and JavaScript.
 
 ---
 
-##  Tailored for B.Tech. College Life
+## Tailored for College Life
 
-SpendWise includes spending and income streams designed for an engineering student:
+SpendWise tracks expense and income categories for campus life:
 
-### Student Expense Categories:
-1. **Hostel Fees**: Semester accommodation, room installment, mess fees, laundry deposits.
-2. **Food**: College mess card recharge, campus canteen cutting chai & samosas, midnight Maggi during exams.
-3. **Fuel**: Two-wheeler scooty petrol for college, coaching, and lab commute.
-4. **Travel**: Metro card recharge, auto rides, holiday trains & buses back home for semester breaks.
-5. **Stationery**: Engineering graphics drawing sheets, Casio fx-991CW scientific calculator, lab journals, assignment Xerox and printouts.
-6. **Phone Recharge**: 5G student data plans (Airtel / Jio 3-month unlimited pack), hostel room shared WiFi contribution.
-7. **Tech & Books**: Udemy/Coursera coding courses, core engineering textbooks (DSA, OS, DBMS), cloud credits for group projects.
-8. **Entertainment**: College tech fest & hackathon passes, batch movie nights, outings with friends.
-9. **Others**: Semester exam admit card fees, campus pharmacy, personal care.
+### Student Expense Categories
+1. **Hostel Fees**: Semester accommodation, room installment, mess fees, and laundry deposits.
+2. **Food**: Campus canteen lunches, cutting chai, snacks, and exam week food.
+3. **Fuel**: Two-wheeler scooty fuel for college and lab commute.
+4. **Travel**: Metro card recharge, auto rides, and holiday trains back home for semester breaks.
+5. **Stationery**: Engineering drawing sheets, Casio scientific calculator, lab journals, and assignment printouts.
+6. **Phone Recharge**: 5G student data plans and hostel shared Wi-Fi contributions.
+7. **Tech & Books**: Online course certifications, core engineering textbooks, and cloud credits for projects.
+8. **Entertainment**: College fest tickets, movie outings, and team celebrations.
+9. **Others**: University exam fees, pharmacy, and personal care.
 
-### Student Income Streams:
+### Student Income Streams
 - **Allowance**: Monthly pocket money and college support from parents.
-- **Internship Stipend**: Remote / summer frontend software development internship earnings.
-- **Freelance**: Python automation scripts, web design, and coding tasks for seniors/clients.
-- **Scholarship**: University merit-cum-means scholarship awards.
+- **Internship Stipend**: Software development internship earnings.
+- **Freelance**: Python automation scripts, web design, and technical assignments.
+- **Scholarship**: University academic merit awards.
 
 ---
 
@@ -34,60 +34,67 @@ SpendWise includes spending and income streams designed for an engineering stude
 python app.py
 ```
 
-The database (`spendwise.db`) is automatically initialized and seeded on the very first run.
+The database (`spendwise.db`) is automatically initialized and seeded on first run.
 Open your browser at:
-👉 **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+**http://127.0.0.1:5000**
 
 ---
 
-## 👤 Test Student Account
+## Demo Student Account
 
 | Field | Value |
 |---|---|
-| **Name** | **Parnika Lilani** |
+| **Name** | Parnika Lilani |
 | **Email** | `parnika@spendwise.com` (or `test@spendwise.com`) |
 | **Password** | `test123` |
-| **Quick Access** | Click **"⚡ Login as Parnika Lilani"** on the login page for 1-click demo entry! |
+| **Quick Access** | Click "Fill Parnika Lilani Credentials" on the login page for quick entry. |
 
 ---
 
 ## Visual Design System
 
-- **Dark Mode Background:** `#0F0F0F`
-- **Cards & Surfaces:** `#1A1A1A` with subtle border `#2A2A2A`
+- **Background:** `#0F0F0F`
+- **Cards & Surfaces:** `#1A1A1A` with border `#2A2A2A`
 - **Primary Accent:** Orange `#F97316`
-- **Typography:** `Inter` from Google Fonts
-- **Currency:** Indian Rupee `₹`
-- **Intelligent Dual-Color Progress Bars**:
-  - **Orange (`#F97316`)** when spending $\le 85\%$ of the category budget limit.
-  - **Red (`#EF4444`)** when category spending crosses $> 85\%$ (e.g. `Stationery` at $94.7\%$ and `Phone Recharge` at $89.9\%$).
+- **Typography:** `Plus Jakarta Sans` for headings, `Inter` for interface elements
+- **Currency:** Indian Rupee (`₹`)
+- **Dual-Color Progress Bars**:
+  - Orange (`#F97316`) when category spending is under 85% of limit.
+  - Red (`#EF4444`) when spending crosses 85%.
 - **6-Month Financial Ledger**:
-  - Highlights surplus months in **Green** (`+₹`).
-  - Highlights deficit months in **Red** (`-₹`) (e.g. August semester commencement with hostel fee payments).
+  - Highlights surplus months in Green.
+  - Highlights deficit months in Red (such as August semester commencement hostel payments).
 
 ---
 
-## Project Architecture
+## Project Structure
 ```
 spendwise/
-├── app.py                     # Flask server with student categories & JSON APIs
-├── database.py                # SQLite schema and connection manager
-├── seed.py                    # 6-Month realistic student dummy data generator
-├── test_spendwise.py          # Complete student test suite
+├── app.py                     # Entry point importing backend application
 ├── requirements.txt           # Dependencies (Flask, Werkzeug)
-├── README.md                  # Student edition documentation
-├── static/
-│   ├── css/
-│   │   └── style.css          # Dark theme styles, inputs, cards, tables, modal
-│   └── js/
-│       ├── main.js            # Student categories switcher, modal, AJAX CRUD
-│       ├── charts.js          # Chart.js Doughnut & Bar visualizations
-│       └── chart.min.js       # Bundled Chart.js fallback script
-└── templates/
-    ├── base.html              # Base layout with navbar, modal & FAB button
-    ├── auth.html              # Student login & registration
-    ├── dashboard.html         # Campus & semester financial overview
-    ├── transactions.html      # Filterable transaction ledger
-    ├── budgets.html           # Category spending limits & dual-color progress bars
-    └── history.html           # 6-Month surplus / deficit ledger
+├── vercel.json                # Vercel deployment configuration
+├── README.md                  # Project documentation
+├── test_spendwise.py          # Complete student test suite
+├── api/
+│   └── index.py               # Vercel serverless WSGI entry point
+├── backend/
+│   ├── app.py                 # Flask server, authentication, APIs, and routes
+│   ├── database.py            # SQLite schema and connection manager
+│   ├── seed.py                # 6-Month student seed data generator
+│   └── spendwise.db           # SQLite database file
+└── frontend/
+    ├── static/
+    │   ├── css/
+    │   │   └── style.css      # Dark theme styling, inputs, tables, modal
+    │   └── js/
+    │       ├── main.js        # Reactive store, client persistence, modal CRUD
+    │       ├── charts.js      # Chart.js Doughnut and Bar visualizations
+    │       └── chart.min.js   # Local Chart.js fallback script
+    └── templates/
+        ├── base.html          # Base layout with navbar, modal, and action button
+        ├── auth.html          # Student login and registration
+        ├── dashboard.html     # Campus and semester financial overview
+        ├── transactions.html  # Filterable transaction ledger
+        ├── budgets.html       # Category spending limits and progress bars
+        └── history.html       # 6-Month surplus and deficit ledger
 ```

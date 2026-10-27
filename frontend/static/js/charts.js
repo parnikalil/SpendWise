@@ -1,22 +1,22 @@
 /**
- * SpendWise — Reactive Chart.js Engine for Dashboard
- * Synchronized directly with the centralized transactions store.
+ * SpendWise: Reactive Chart Engine for Dashboard
+ * Synchronized with the centralized transactions store.
  */
 
 let pieChartInstance = null;
 let barChartInstance = null;
 
 const ORANGE_SHADES = [
-  '#F97316', // Primary vibrant orange
-  '#FB923C', // Amber orange
-  '#FDBA74', // Peach orange
-  '#FED7AA', // Soft pale orange
-  '#EA580C', // Deep burnt orange
-  '#C2410C', // Dark rust orange
-  '#9A3412', // Deep earthy orange
-  '#FF7A00', // Electric orange
-  '#D97706', // Warm amber
-  '#F59E0B'  // Golden yellow-orange
+  '#F97316',
+  '#FB923C',
+  '#FDBA74',
+  '#FED7AA',
+  '#EA580C',
+  '#C2410C',
+  '#9A3412',
+  '#FF7A00',
+  '#D97706',
+  '#F59E0B'
 ];
 
 window.renderDashboardChartsFromStore = function(transactions, currentMonthKey) {
@@ -32,7 +32,6 @@ function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
   const container = document.getElementById('pieChartContainer');
   if (!container) return;
 
-  // Filter expenses for current month
   const categoryTotals = {};
   let totalExpenseThisMonth = 0;
 
@@ -54,14 +53,12 @@ function renderExpenseDoughnut(canvas, transactions, currentMonthKey) {
     }
     container.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#9CA3AF; gap:0.5rem;">
-        <span style="font-size:2rem;">🍩</span>
         <p style="font-size:0.9rem;">No expenses recorded for this month yet.</p>
       </div>
     `;
     return;
   }
 
-  // Ensure canvas is in container
   let currentCanvas = document.getElementById('expensePieChart');
   if (!currentCanvas) {
     container.innerHTML = '<canvas id="expensePieChart"></canvas>';
@@ -178,7 +175,7 @@ function renderIncomeExpenseBars(canvas, transactions) {
         {
           label: 'Income',
           data: incomeData,
-          backgroundColor: '#F97316', // Vibrant primary orange
+          backgroundColor: '#F97316',
           borderRadius: 6,
           barPercentage: 0.6,
           categoryPercentage: 0.65
@@ -186,7 +183,7 @@ function renderIncomeExpenseBars(canvas, transactions) {
         {
           label: 'Expense',
           data: expenseData,
-          backgroundColor: '#FED7AA', // Peach light orange
+          backgroundColor: '#FED7AA',
           borderRadius: 6,
           barPercentage: 0.6,
           categoryPercentage: 0.65

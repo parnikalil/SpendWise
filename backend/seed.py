@@ -58,7 +58,7 @@ def seed_data():
     today = datetime.date.today()
 
     months_data = [
-        # offset 0: Current Month (e.g. October 2026) — Active Semester
+        # offset 0: Current Month (e.g. October 2026): Active Semester
         (
             0,
             [
@@ -94,7 +94,7 @@ def seed_data():
                 "Others": 1500.0
             }
         ),
-        # offset 1: 1 Month Ago (e.g. September 2026) — Mid-Term Exams
+        # offset 1: 1 Month Ago (e.g. September 2026): Mid-Term Exams
         (
             1,
             [
@@ -124,7 +124,7 @@ def seed_data():
                 "Others": 1500.0
             }
         ),
-        # offset 2: 2 Months Ago (e.g. August 2026) — SEMESTER COMMENCEMENT (Expenses > Income)
+        # offset 2: 2 Months Ago (e.g. August 2026): SEMESTER COMMENCEMENT (Expenses > Income)
         (
             2,
             [
@@ -154,7 +154,7 @@ def seed_data():
                 "Others": 3000.0
             }
         ),
-        # offset 3: 3 Months Ago (e.g. July 2026) — Summer Internship & Scholarship
+        # offset 3: 3 Months Ago (e.g. July 2026): Summer Internship & Scholarship
         (
             3,
             [
@@ -185,7 +185,7 @@ def seed_data():
                 "Others": 1500.0
             }
         ),
-        # offset 4: 4 Months Ago (e.g. June 2026) — Semester End Travel & Gear
+        # offset 4: 4 Months Ago (e.g. June 2026): Semester End Travel & Gear
         (
             4,
             [
@@ -215,7 +215,7 @@ def seed_data():
                 "Others": 1500.0
             }
         ),
-        # offset 5: 5 Months Ago (e.g. May 2026) — Even Semester Exams
+        # offset 5: 5 Months Ago (e.g. May 2026): Even Semester Exams
         (
             5,
             [

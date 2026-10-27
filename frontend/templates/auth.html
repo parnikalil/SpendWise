@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}SpendWise — Student Login & Register{% endblock %}
+{% block title %}SpendWise: Student Portal{% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
@@ -10,13 +10,13 @@
         <span class="brand-icon">₹</span>
         <span>SpendWise</span>
       </div>
-      <p class="page-subtitle" style="font-weight: 500;">B.Tech. Student Edition • Smart Campus Finance</p>
+      <p class="page-subtitle" style="font-weight: 500;">B.Tech Student Edition • Campus Expense Ledger</p>
     </div>
 
     <!-- Toggle between Login & Register -->
     <div class="auth-tabs">
       <button type="button" class="auth-tab-btn {% if active_tab != 'register' %}active{% endif %}" id="tabLoginBtn">
-        Student Log In
+        Student Sign In
       </button>
       <button type="button" class="auth-tab-btn {% if active_tab == 'register' %}active{% endif %}" id="tabRegisterBtn">
         Create Account
@@ -26,11 +26,11 @@
     <!-- Demo Credentials Quick Access Hint -->
     <div class="demo-account-hint">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong>🎓 Demo Account: Parnika Lilani</strong>
-        <span style="font-size:0.75rem; background: rgba(249,115,22,0.2); padding: 2px 6px; border-radius: 4px;">B.Tech Student</span>
+        <strong>Demo Profile: Parnika Lilani</strong>
+        <span style="font-size:0.75rem; background: rgba(249,115,22,0.2); padding: 2px 6px; border-radius: 4px; color: var(--accent-orange-light);">B.Tech Student</span>
       </div>
       <span>Email: <code>parnika@spendwise.com</code> | Pass: <code>test123</code></span>
-      <button type="button" id="useDemoCredsBtn">⚡ Login as Parnika Lilani</button>
+      <button type="button" id="useDemoCredsBtn">Fill Parnika Lilani Credentials</button>
     </div>
 
     <!-- LOGIN FORM -->
@@ -46,7 +46,7 @@
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
-        Sign In to Student Portal
+        Sign In
       </button>
     </form>
 
@@ -68,7 +68,7 @@
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
-        Create Student Account
+        Create Account
       </button>
     </form>
 
@@ -105,7 +105,7 @@
       tabLoginBtn.click();
       document.getElementById('loginEmail').value = 'parnika@spendwise.com';
       document.getElementById('loginPassword').value = 'test123';
-      loginForm.querySelector('button[type="submit"]').focus();
+      document.getElementById('loginEmail').focus();
     });
   }
 </script>

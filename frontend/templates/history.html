@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}SpendWise — 6-Month Financial History{% endblock %}
+{% block title %}SpendWise: 6-Month Financial History{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
     <h1 class="page-title">Financial History</h1>
-    <p class="page-subtitle">Monthly breakdown of income, expenses, and net savings across the last 6 months</p>
+    <p class="page-subtitle">Semester and monthly breakdown of income, expenses, and net savings across the last 6 months.</p>
   </div>
 </div>
 
@@ -15,7 +15,7 @@
   <div class="summary-card income">
     <div class="summary-header">
       <span class="summary-label">6-Month Total Income</span>
-      <div class="summary-icon">📈</div>
+      <span style="font-size: 0.78rem; color: var(--color-green); font-weight: 600;">Inflow</span>
     </div>
     <div class="summary-value" id="histIncomeAll" style="color: var(--color-green);">
       {{ total_income_all | currency }}
@@ -26,7 +26,7 @@
   <div class="summary-card expense">
     <div class="summary-header">
       <span class="summary-label">6-Month Total Expenses</span>
-      <div class="summary-icon">📉</div>
+      <span style="font-size: 0.78rem; color: var(--accent-orange); font-weight: 600;">Outflow</span>
     </div>
     <div class="summary-value" id="histExpenseAll" style="color: var(--accent-orange);">
       {{ total_expense_all | currency }}
@@ -37,16 +37,16 @@
   <div class="summary-card balance">
     <div class="summary-header">
       <span class="summary-label">6-Month Cumulative Savings</span>
-      <div class="summary-icon">🏦</div>
+      <span style="font-size: 0.78rem; color: {% if total_savings_all >= 0 %}var(--color-green){% else %}var(--color-red){% endif %}; font-weight: 600;">Net</span>
     </div>
     <div class="summary-value" id="histSavingsAll" style="color: {% if total_savings_all >= 0 %}var(--color-green){% else %}var(--color-red){% endif %};">
       {% if total_savings_all >= 0 %}+{% endif %}{{ total_savings_all | currency }}
     </div>
     <div class="summary-subtext" id="histSavingsSubtext">
       {% if total_savings_all >= 0 %}
-      Positive net wealth accumulation
+      Positive net savings across selected period
       {% else %}
-      Net cash outflow deficit
+      Net outflow exceeded income
       {% endif %}
     </div>
   </div>
@@ -86,12 +86,12 @@
           </td>
           <td style="text-align: center;">
             {% if row.is_positive %}
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background-color: var(--color-green-bg); color: var(--color-green); padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.3);">
-              <span>●</span> Surplus
+            <span style="display: inline-flex; align-items: center; background-color: var(--color-green-bg); color: var(--color-green); padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.3);">
+              Surplus
             </span>
             {% else %}
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background-color: var(--color-red-bg); color: var(--color-red); padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.3);">
-              <span>●</span> Deficit
+            <span style="display: inline-flex; align-items: center; background-color: var(--color-red-bg); color: var(--color-red); padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.3);">
+              Deficit
             </span>
             {% endif %}
           </td>

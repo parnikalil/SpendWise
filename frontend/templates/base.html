@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}SpendWise — Smart Personal Finance Tracker{% endblock %}</title>
+  <title>{% block title %}SpendWise: Personal Finance Ledger{% endblock %}</title>
+  <meta name="description" content="Personal expense and budget ledger for student life, semester fees, and campus essentials.">
+  <meta property="og:title" content="SpendWise: Student Expense Ledger">
+  <meta property="og:description" content="Personal expense tracking and category budgets for college semester planning.">
+  <meta property="og:type" content="website">
 
-  <!-- Google Font: Inter -->
+  <!-- Typography: Plus Jakarta Sans (Headings) and Inter (Interface Body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Core Dark Theme CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -39,22 +43,22 @@
       <ul class="nav-links" id="navLinks">
         <li>
           <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == url_for('dashboard') %}active{% endif %}">
-            <span>📊</span> Dashboard
+            Dashboard
           </a>
         </li>
         <li>
           <a href="{{ url_for('transactions') }}" class="nav-link {% if request.path == url_for('transactions') %}active{% endif %}">
-            <span>💳</span> Transactions
+            Transactions
           </a>
         </li>
         <li>
           <a href="{{ url_for('budgets') }}" class="nav-link {% if request.path == url_for('budgets') %}active{% endif %}">
-            <span>🎯</span> Budgets
+            Budgets
           </a>
         </li>
         <li>
           <a href="{{ url_for('history') }}" class="nav-link {% if request.path == url_for('history') %}active{% endif %}">
-            <span>📜</span> History
+            History
           </a>
         </li>
       </ul>
@@ -113,10 +117,10 @@
           <!-- Type Toggle: Expense / Income -->
           <div class="type-toggle-group">
             <button type="button" class="type-toggle-btn active expense" id="typeExpenseBtn">
-              <span>📉</span> Expense
+              Expense
             </button>
             <button type="button" class="type-toggle-btn" id="typeIncomeBtn">
-              <span>📈</span> Income
+              Income
             </button>
           </div>
 
@@ -132,7 +136,7 @@
             <select id="txCategory" class="form-control" required>
               <option value="">Select Category</option>
               {% for cat in expense_categories %}
-              <option value="{{ cat }}">{{ category_icons.get(cat, '📦') }} {{ cat }}</option>
+              <option value="{{ cat }}">{{ category_icons.get(cat, '•') }} {{ cat }}</option>
               {% endfor %}
             </select>
           </div>
@@ -146,7 +150,7 @@
           <!-- Note -->
           <div class="form-group">
             <label class="form-label" for="txNote">Note (optional)</label>
-            <input type="text" id="txNote" class="form-control" placeholder="e.g. Grocery shopping, Freelance payment">
+            <input type="text" id="txNote" class="form-control" placeholder="e.g. Hostel mess, project printout">
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 /**
- * SpendWise — Centralized Store & Reactive UI Engine
+ * SpendWise: Centralized Store & Reactive UI Engine
  * Solves serverless drift by using a unified, client-synced single source of truth.
  */
 
@@ -213,7 +213,7 @@ function formatCurrency(val) {
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '—';
+  if (!dateStr) return '-';
   try {
     const parts = String(dateStr).split('-');
     if (parts.length === 3) {
@@ -267,9 +267,13 @@ function renderDashboard() {
   if (balSub) {
     if (netBalance >= 0) {
       const pct = totalIncome > 0 ? ((netBalance / totalIncome) * 100).toFixed(1) : 0;
-      balSub.textContent = `Savings rate: ${pct}%`;
+      balSub.textContent = `Savings rate: ${pct}% of monthly inflow retained`;
+    const balPill = document.getElementById('summaryBalancePill');
+    if (balPill) { balPill.className = 'badge-status-pill surplus'; balPill.textContent = 'Monthly Surplus'; }
     } else {
-      balSub.textContent = 'Deficit: Spent more than income';
+      balSub.textContent = 'Deficit: Outflow exceeded income this month';
+    const balPill = document.getElementById('summaryBalancePill');
+    if (balPill) { balPill.className = 'badge-status-pill deficit'; balPill.textContent = 'Net Deficit'; }
     }
   }
 
@@ -294,7 +298,7 @@ function renderDashboard() {
             </span>
           </td>
           <td style="color: var(--text-secondary); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            ${t.note || '—'}
+            ${t.note || '-'}
           </td>
           <td style="text-align: right;">
             <span class="${t.type === 'Income' ? 'amount-income' : 'amount-expense'}">
@@ -303,8 +307,8 @@ function renderDashboard() {
           </td>
           <td style="text-align: center;">
             <div class="action-buttons" style="justify-content: center;">
-              <button class="btn-icon" data-edit-tx="${t.id}" title="Edit transaction" aria-label="Edit">✏️</button>
-              <button class="btn-icon delete" data-delete-tx="${t.id}" title="Delete transaction" aria-label="Delete">🗑️</button>
+              <button class="btn-icon" data-edit-tx="${t.id}" title="Edit transaction" aria-label="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+              <button class="btn-icon delete" data-delete-tx="${t.id}" title="Delete transaction" aria-label="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
             </div>
           </td>
         </tr>
@@ -352,7 +356,7 @@ function renderTransactionsPage() {
           </span>
         </td>
         <td style="color: var(--text-secondary); max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          ${t.note || '—'}
+          ${t.note || '-'}
         </td>
         <td style="text-align: right;">
           <span class="${t.type === 'Income' ? 'amount-income' : 'amount-expense'}">
@@ -361,8 +365,8 @@ function renderTransactionsPage() {
         </td>
         <td style="text-align: center;">
           <div class="action-buttons" style="justify-content: center;">
-            <button class="btn-icon" data-edit-tx="${t.id}" title="Edit transaction" aria-label="Edit">✏️</button>
-            <button class="btn-icon delete" data-delete-tx="${t.id}" title="Delete transaction" aria-label="Delete">🗑️</button>
+            <button class="btn-icon" data-edit-tx="${t.id}" title="Edit transaction" aria-label="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+            <button class="btn-icon delete" data-delete-tx="${t.id}" title="Delete transaction" aria-label="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
           </div>
         </td>
       </tr>
@@ -416,7 +420,7 @@ function renderBudgetsPage() {
 
     const remVal = card.querySelector('.budget-remaining-val');
     if (remVal) {
-      remVal.textContent = limit > 0 ? formatCurrency(remaining) : '—';
+      remVal.textContent = limit > 0 ? formatCurrency(remaining) : '-';
       remVal.style.color = remaining >= 0 ? 'var(--color-green)' : 'var(--color-red)';
     }
 
@@ -434,7 +438,7 @@ function renderBudgetsPage() {
 
     const statusLabel = card.querySelector('.budget-status-label');
     if (statusLabel) {
-      statusLabel.textContent = isExceeded85 ? '🚨 Over 85% threshold' : 'Safe spending';
+      statusLabel.textContent = isExceeded85 ? 'Over 85% limit' : 'Under limit';
       statusLabel.style.color = isExceeded85 ? 'var(--color-red)' : 'var(--text-muted)';
     }
   });
@@ -451,7 +455,7 @@ function renderBudgetsPage() {
     totalPctEl.textContent = overallPct + '%';
     totalPctEl.style.color = overallPct > 85 ? 'var(--color-red)' : 'var(--accent-orange)';
     if (totalStatusEl) {
-      totalStatusEl.textContent = overallPct > 85 ? '⚠️ Warning: High budget utilization!' : '✅ Within healthy spending thresholds';
+      totalStatusEl.textContent = overallPct > 85 ? 'Warning: High budget utilization' : 'Spending remains within limits';
     }
   }
 }
