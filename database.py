@@ -1,47 +1,51 @@
 import os
-import shutil
 import sqlite3
+
+try:
+    import libsql
+    _HAS_LIBSQL = True
+except ImportError:
+    _HAS_LIBSQL = False
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Vercel serverless functions have a read-only filesystem, except for /tmp
-IS_VERCEL = bool(os.environ.get('VERCEL'))
-DB_DIR = '/tmp' if IS_VERCEL else BASE_DIR
-DB_PATH = os.path.join(DB_DIR, 'spendwise.db')
-PRESEEDED_DB = os.path.join(BASE_DIR, 'spendwise.db')
+# Hosted database credentials (set in Vercel Environment Variables)
+DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')
+AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
 
-def ensure_database_ready():
-    """Ensure database exists and is fully read-write in both local and serverless environments."""
-    if IS_VERCEL:
-        if not os.path.exists(DB_PATH):
-            if os.path.exists(PRESEEDED_DB):
-                # Use copyfile instead of copy2 so read-only file permissions are not copied
-                shutil.copyfile(PRESEEDED_DB, DB_PATH)
-            else:
-                init_db()
-                from seed import seed_data
-                seed_data()
-        
-        # Ensure full read-write permissions on DB_PATH
-        try:
-            os.chmod(DB_PATH, 0o666)
-        except Exception:
-            pass
+# Kept so app.py's `from database import DB_PATH` import keeps working.
+# In production this path is no longer used for data storage.
+DB_PATH = os.path.join(BASE_DIR, 'spendwise.db')
+
+
+def _use_hosted_db():
+    """True when hosted DB credentials are present (production on Vercel)."""
+    return bool(DATABASE_URL and AUTH_TOKEN and _HAS_LIBSQL)
+
 
 def get_db_connection():
-    ensure_database_ready()
+    """Return a database connection that works in both environments.
+
+    The returned connection mimics the sqlite3 API (execute, cursor,
+    commit, row_factory), so the rest of the app needs no changes.
+    """
+    if _use_hosted_db():
+        conn = libsql.connect(DATABASE_URL, auth_token=AUTH_TOKEN)
+        try:
+            conn.row_factory = sqlite3.Row
+        except Exception:
+            pass
+        return conn
+
+    # Local development fallback: plain SQLite file
     conn = sqlite3.connect(DB_PATH, timeout=20.0)
     conn.row_factory = sqlite3.Row
-    # Foreign keys off in serverless to prevent multi-lambda container desync errors
-    conn.execute("PRAGMA foreign_keys = OFF;")
     return conn
 
-def init_db():
-    if IS_VERCEL and not os.path.exists(DB_DIR):
-        os.makedirs(DB_DIR, exist_ok=True)
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+def init_db():
+    """Create all tables if they do not exist yet (safe to run repeatedly)."""
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -83,6 +87,8 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 if __name__ == '__main__':
     init_db()
-    print(f"Database initialized at {DB_PATH}")
+    print(f"Database initialized: "
+          f"{'hosted Turso DB' if _use_hosted_db() else f'local file at {DB_PATH}'}")
